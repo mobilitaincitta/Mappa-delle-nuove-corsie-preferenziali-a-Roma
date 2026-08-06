@@ -3,10 +3,12 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
-// base: il sito è servito da https://<utente>.github.io/<repo>/, quindi gli
-// asset non possono essere referenziati dalla radice del dominio.
-export default defineConfig({
-  base: '/corsie-preferenziali-roma/',
+export default defineConfig(({ command }) => ({
+  // In produzione il sito è servito da https://<utente>.github.io/<repo>/, quindi
+  // gli asset non possono essere referenziati dalla radice del dominio. In
+  // sviluppo invece il base va lasciato su '/': altrimenti l'app risponde solo
+  // su localhost:<porta>/corsie-preferenziali-roma/ e la radice sembra vuota.
+  base: command === 'build' ? '/corsie-preferenziali-roma/' : '/',
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: { '@': path.resolve(__dirname, './src') },
@@ -27,4 +29,4 @@ export default defineConfig({
       },
     },
   },
-})
+}))
