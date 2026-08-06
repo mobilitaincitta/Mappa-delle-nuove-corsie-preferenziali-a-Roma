@@ -69,10 +69,9 @@ export interface Dataset {
   meta: Meta
 }
 
-/** Stato dei filtri, condiviso da mappa, KPI, grafico e tabella. */
+/** Stato dei filtri, condiviso da mappa, KPI e tabella. */
 export interface Filtri {
   scenari: Set<Scenario>
-  tipi: Set<TipoId>
   mostraEsistenti: boolean
 }
 

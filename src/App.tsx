@@ -5,7 +5,6 @@ import { MapView, type MapHandle } from '@/components/map-view'
 import { StreetSearch } from '@/components/street-search'
 import { StatTiles } from '@/components/stat-tiles'
 import { ScenarioControl } from '@/components/scenario-control'
-import { TypeControl } from '@/components/type-control'
 import { SegmentDetail } from '@/components/segment-detail'
 import { SegmentTable } from '@/components/segment-table'
 import { Legend } from '@/components/legend'
@@ -23,7 +22,7 @@ import { caricaDataset } from '@/lib/dataset'
 import { costruisciIndice, bboxDiFeature } from '@/lib/streets'
 import { useTheme } from '@/lib/use-theme'
 import { formattaKm, formattaNumero } from '@/lib/format'
-import type { Dataset, Filtri, Meta, Scenario, TipoId } from '@/lib/types'
+import type { Dataset, Filtri, Meta, Scenario } from '@/lib/types'
 
 const TUTTI_SCENARI: Scenario[] = [1, 2, 3]
 
@@ -36,21 +35,12 @@ export default function App() {
 
   const [filtri, setFiltri] = useState<Filtri>({
     scenari: new Set(TUTTI_SCENARI),
-    tipi: new Set<TipoId>(),
     mostraEsistenti: true,
   })
 
   useEffect(() => {
     caricaDataset()
-      .then((d) => {
-        setDataset(d)
-        // I tipi si conoscono solo a dati caricati: all'inizio sono tutti attivi,
-        // compreso il gruppo senza tipologia (chiave null).
-        setFiltri((f) => ({
-          ...f,
-          tipi: new Set(d.meta.proposte.perTipo.map((g) => (g.key === null ? null : Number(g.key)))),
-        }))
-      })
+      .then(setDataset)
       .catch((e: Error) => setErrore(e.message))
   }, [])
 
@@ -61,9 +51,8 @@ export default function App() {
 
   const filtrati = useMemo(() => {
     if (!dataset) return []
-    return dataset.proposte.features.filter(
-      (f) =>
-        filtri.scenari.has(f.properties.scenario) && filtri.tipi.has(f.properties.tipoId)
+    return dataset.proposte.features.filter((f) =>
+      filtri.scenari.has(f.properties.scenario)
     )
   }, [dataset, filtri])
 
@@ -101,10 +90,7 @@ export default function App() {
     )
   }
 
-  const filtriAttivi =
-    !!dataset &&
-    (filtri.scenari.size !== TUTTI_SCENARI.length ||
-      filtri.tipi.size !== dataset.meta.proposte.perTipo.length)
+  const filtriAttivi = !!dataset && filtri.scenari.size !== TUTTI_SCENARI.length
 
   const toggleScenario = (s: Scenario) =>
     setFiltri((f) => {
@@ -112,14 +98,6 @@ export default function App() {
       if (scenari.has(s)) scenari.delete(s)
       else scenari.add(s)
       return { ...f, scenari }
-    })
-
-  const toggleTipo = (t: TipoId) =>
-    setFiltri((f) => {
-      const tipi = new Set(f.tipi)
-      if (tipi.has(t)) tipi.delete(t)
-      else tipi.add(t)
-      return { ...f, tipi }
     })
 
   return (
@@ -210,13 +188,6 @@ export default function App() {
                         totale={dataset.meta.proposte.len}
                         attivi={filtri.scenari}
                         onToggle={toggleScenario}
-                      />
-
-                      <TypeControl
-                        perTipo={dataset.meta.proposte.perTipo}
-                        glosse={dataset.meta.glosse}
-                        attivi={filtri.tipi}
-                        onToggle={toggleTipo}
                       />
 
                       <NotaFonte qualita={dataset.meta.qualita} />

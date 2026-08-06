@@ -104,6 +104,8 @@ export function MapView({
   }, [])
 
   const [guasto, setGuasto] = useState<string | null>(null)
+  /** Vero finché l'inquadratura è ancora quella automatica di partenza. */
+  const autoInquadra = useRef(true)
 
   // --- creazione (una sola volta) ---------------------------------------
   useEffect(() => {
@@ -127,6 +129,11 @@ export function MapView({
     const map = new maplibregl.Map({
       container: contenitore.current,
       attributionControl: false,
+      // Serve a poter leggere i pixel del canvas per le verifiche; ha un costo
+      // di memoria, quindi resta fuori dalla produzione.
+      ...(import.meta.env.DEV
+        ? { canvasContextAttributes: { preserveDrawingBuffer: true } }
+        : {}),
       bounds,
       fitBoundsOptions: { padding: 48 },
       style: {
@@ -333,6 +340,12 @@ export function MapView({
       pronta.current = true
       aggiornaTema(map, scuro)
       aggiornaFiltri(map, filtri)
+      // Il fit passato al costruttore usa la dimensione che il contenitore ha in
+      // quel momento, prima che il layout si sia stabilizzato: il risultato è
+      // una vista troppo larga, con la rete ridotta a un groviglio al centro e
+      // mezzo Lazio intorno. A `load` la misura è quella definitiva.
+      map.resize()
+      map.fitBounds(bounds, { padding: 32, duration: 0 })
     })
 
     // Se lo stile non arriva a `load`, l'area resterebbe vuota per sempre senza
@@ -348,6 +361,33 @@ export function MapView({
       }
     }, 15000)
 
+    /**
+     * MapLibre reagisce al ridimensionamento della finestra, non a quello del
+     * proprio contenitore. Qui il contenitore cambia altezza senza che la
+     * finestra si muova — il pannello laterale si popola a dati caricati e la
+     * riga della griglia si assesta — e senza questo osservatore il canvas
+     * resta all'altezza iniziale: la mappa diventa una striscia in alto con un
+     * vuoto sotto.
+     */
+    const osservatore = new ResizeObserver(() => {
+      map.resize()
+      // A canvas più alto lo stesso zoom mostra più territorio: finché
+      // l'inquadratura è quella automatica va ricalcolata, altrimenti la rete
+      // resta un groviglio al centro con mezzo Lazio intorno.
+      if (autoInquadra.current && pronta.current) {
+        map.fitBounds(bounds, { padding: 32, duration: 0 })
+      }
+    })
+    osservatore.observe(contenitore.current)
+
+    // Appena l'utente muove la mappa, l'inquadratura è sua e non va più toccata.
+    const cedi = () => {
+      autoInquadra.current = false
+    }
+    map.on('dragstart', cedi)
+    map.on('wheel', cedi)
+    map.on('dblclick', cedi)
+
     mappa.current = map
 
     // Aggancio per l'ispezione manuale in sviluppo; non entra nel bundle di
@@ -357,6 +397,7 @@ export function MapView({
     }
 
     return () => {
+      osservatore.disconnect()
       clearTimeout(guardiano)
       popup.current?.remove()
       map.remove()
@@ -394,6 +435,7 @@ export function MapView({
       const handle: MapHandle = {
       inquadra: (bbox, zoomMax = 16) => {
         if (!bbox.every((n) => Number.isFinite(n))) return
+        autoInquadra.current = false
         quandoPronta((map) => {
           // Una strada di 30 m darebbe un bbox quasi degenere: il padding e
           // maxZoom evitano di finire a zoom 22 su un punto.
@@ -407,6 +449,7 @@ export function MapView({
         })
       },
       volaSu: (lon, lat, zoom = 16) => {
+        autoInquadra.current = false
         quandoPronta((map) => map.flyTo({ center: [lon, lat], zoom, duration: 700 }))
       },
       evidenzia: (idProposte, idEsistenti) => {
@@ -435,7 +478,15 @@ export function MapView({
 
   return (
     <>
-      <div ref={contenitore} className="absolute inset-0" />
+      {/*
+        Dimensionato con l'altezza, non con la posizione assoluta: il foglio di
+        stile di MapLibre dichiara `.maplibregl-map { position: relative }` ed
+        entra dopo le utility di Tailwind, quindi a pari specificità vince lui e
+        un `absolute inset-0` verrebbe annullato — con l'altezza che collassa a
+        zero e la mappa invisibile. Con h-full/w-full il riquadro è corretto
+        qualunque posizione MapLibre imponga.
+      */}
+      <div ref={contenitore} className="h-full w-full" />
       {guasto && (
         <div className="absolute inset-0 z-20 grid place-items-center bg-background/95 p-6">
           <div className="max-w-sm text-center">
@@ -490,15 +541,7 @@ function aggiornaTema(map: MapLibreMap, scuro: boolean) {
 
 function aggiornaFiltri(map: MapLibreMap, filtri: Filtri) {
   const scenari = [...filtri.scenari]
-  // `tipoId` è null su 144 feature: nelle expression MapLibre null non si
-  // confronta, quindi viene ricondotto a -1 da entrambi i lati.
-  const tipi = [...filtri.tipi].map((t) => (t == null ? -1 : t))
-
-  const filtro: unknown[] = [
-    'all',
-    ['in', ['get', 'scenario'], ['literal', scenari]],
-    ['in', ['coalesce', ['get', 'tipoId'], -1], ['literal', tipi]],
-  ]
+  const filtro: unknown[] = ['in', ['get', 'scenario'], ['literal', scenari]]
 
   for (const id of ['proposte', 'proposte-alone', 'proposte-click']) {
     if (map.getLayer(id)) map.setFilter(id, filtro as never)

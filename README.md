@@ -50,9 +50,12 @@ verificata (luminosità monotona, gap ≥ 0,06, estremo chiaro sopra 2:1).
 
 Le corsie **esistenti** sono contesto, non soggetto: grigio neutro, con TRAM e
 PROMISCUO distinti dal tratteggio e non dal colore, così il blu significa una cosa
-sola in tutta la dashboard. La tipologia di corsia è una categoria senza ordine e
-usa barre di un solo colore: colorarne sei metterebbe quei colori in competizione
-con la scala di priorità.
+sola in tutta la dashboard.
+
+L'unico filtro è quello per scenario. La tipologia di corsia (`Ty_CP`) resta
+visibile sul singolo segmento — nella tabella e nel pannello di dettaglio — ma non
+ha un proprio pannello di filtro: su 275 segmenti è indicata solo per 131, quindi
+come dimensione di analisi vale poco.
 
 ## Limiti del dato di partenza
 
