@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Info, TriangleAlert } from 'lucide-react'
+import { TriangleAlert } from 'lucide-react'
 
 import { MapView, type MapHandle } from '@/components/map-view'
 import { StreetSearch } from '@/components/street-search'
@@ -15,14 +15,13 @@ import { Card } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { TooltipProvider } from '@/components/ui/tooltip'
 
 import { caricaDataset } from '@/lib/dataset'
 import { costruisciIndice, bboxDiFeature } from '@/lib/streets'
 import { useTheme } from '@/lib/use-theme'
-import { formattaKm, formattaNumero } from '@/lib/format'
-import type { Dataset, Filtri, Meta, Scenario } from '@/lib/types'
+import { formattaNumero } from '@/lib/format'
+import type { Dataset, Filtri, Scenario } from '@/lib/types'
 
 const TUTTI_SCENARI: Scenario[] = [1, 2, 3]
 
@@ -189,8 +188,6 @@ export default function App() {
                         attivi={filtri.scenari}
                         onToggle={toggleScenario}
                       />
-
-                      <NotaFonte qualita={dataset.meta.qualita} />
                     </div>
                   </ScrollArea>
                 </TabsContent>
@@ -235,70 +232,5 @@ export default function App() {
         </div>
       </div>
     </TooltipProvider>
-  )
-}
-
-/**
- * I limiti del dato di partenza sono dichiarati, non nascosti: chi legge la
- * dashboard deve sapere che metà dei chilometri non ha una tipologia assegnata.
- */
-function NotaFonte({ qualita }: { qualita: Meta['qualita'] }) {
-  const { kmSenzaTipo, segmentiSotto5m, maxLen, maxTratti, nomiConPiuGrafie, nomiDistinti } =
-    qualita
-  return (
-    <Card className="gap-2 border-dashed px-4 py-3.5">
-      <div className="flex items-center gap-1.5 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
-        <Info className="size-3" />
-        Sul dato
-      </div>
-      <ul className="grid gap-1.5 text-[11px] leading-relaxed text-muted-foreground">
-        <li>
-          <strong className="font-medium text-foreground">{formattaKm(kmSenzaTipo)}</strong> di
-          proposte non hanno tipologia assegnata nel campo Ty_CP.
-        </li>
-        <li>
-          <Tooltip>
-            <TooltipTrigger className="cursor-help text-left underline decoration-dotted underline-offset-2">
-              {nomiConPiuGrafie} nomi su {nomiDistinti} compaiono con grafie diverse.
-            </TooltipTrigger>
-            <TooltipContent className="max-w-64">
-              Nel dato originale la stessa strada è scritta in più modi — «Via Tiburtina»,
-              «via tiburtina» e «VIA TIBURTINA» sono tre record distinti — con doppi spazi e
-              apostrofi incoerenti. La ricerca normalizza i nomi, quindi qui la strada resta
-              una sola; in QGIS restano da uniformare.
-            </TooltipContent>
-          </Tooltip>
-        </li>
-        <li>
-          Le lunghezze sono calcolate qui dalla geometria: l'export di origine non le
-          contiene.
-        </li>
-        <li>
-          <Tooltip>
-            <TooltipTrigger className="cursor-help text-left underline decoration-dotted underline-offset-2">
-              {segmentiSotto5m} geometrie sotto i 5 m e un segmento da{' '}
-              {formattaKm(maxLen)} in {maxTratti} parti.
-            </TooltipTrigger>
-            <TooltipContent className="max-w-64">
-              Anomalie del dato di partenza: le prime sono probabili residui di
-              digitalizzazione, l'ultima sembra l'unione di più strade in una sola
-              feature. Vanno verificate in QGIS, non qui.
-            </TooltipContent>
-          </Tooltip>
-        </li>
-        <li className="pt-1">
-          Fonte: export qgis2web di{' '}
-          <a
-            className="underline decoration-dotted underline-offset-2 hover:text-foreground"
-            href="https://github.com/mobilitaincitta"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Mobilità in Città
-          </a>
-          , conservato in <code className="text-[10px]">legacy/</code>.
-        </li>
-      </ul>
-    </Card>
   )
 }
