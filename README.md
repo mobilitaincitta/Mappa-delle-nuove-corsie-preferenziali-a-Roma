@@ -97,6 +97,9 @@ tile di base Esri Canvas (le stesse dell'export originale, con la variante scura
 
 ## Pubblicazione
 
-Il repository è privato, quindi GitHub Pages non è attivo (richiede un piano a
-pagamento sui repo privati). Per pubblicare: `npm run build` e servire `dist/`. Il
-`base` in `vite.config.ts` è già impostato su `/corsie-preferenziali-roma/`.
+Sito: **https://matteocollotti-code.github.io/corsie-preferenziali-roma/**
+
+Ogni push su `main` fa scattare `.github/workflows/deploy.yml`, che compila e
+pubblica `dist/` su GitHub Pages. Pages non può servire i sorgenti, da qui il
+passaggio di build. Il `base` in `vite.config.ts` vale solo per la build ed è
+impostato sul nome del repository; in sviluppo resta `/`.
