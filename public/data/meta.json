@@ -1,0 +1,101 @@
+{
+  "generatoDa": "scripts/build-data.mjs",
+  "fonte": "export qgis2web in legacy/ (mobilitaincitta@f2ccb21)",
+  "bbox": [
+    12.277051,
+    41.733883,
+    12.637265,
+    41.982578
+  ],
+  "proposte": {
+    "n": 275,
+    "len": 208252,
+    "perScenario": [
+      {
+        "key": 1,
+        "n": 132,
+        "len": 103258
+      },
+      {
+        "key": 2,
+        "n": 101,
+        "len": 71593
+      },
+      {
+        "key": 3,
+        "n": 42,
+        "len": 33401
+      }
+    ],
+    "perTipo": [
+      {
+        "key": 1,
+        "n": 9,
+        "len": 5376
+      },
+      {
+        "key": 2,
+        "n": 57,
+        "len": 56377
+      },
+      {
+        "key": 3,
+        "n": 46,
+        "len": 34015
+      },
+      {
+        "key": 4,
+        "n": 11,
+        "len": 31973
+      },
+      {
+        "key": 5,
+        "n": 4,
+        "len": 3979
+      },
+      {
+        "key": 6,
+        "n": 4,
+        "len": 2239
+      },
+      {
+        "key": null,
+        "n": 144,
+        "len": 74293
+      }
+    ]
+  },
+  "esistenti": {
+    "n": 577,
+    "len": 114379,
+    "perUso": [
+      {
+        "key": "PROMISCUO",
+        "n": 414,
+        "len": 76525
+      },
+      {
+        "key": "TRAM",
+        "n": 163,
+        "len": 37854
+      }
+    ]
+  },
+  "glosse": {
+    "1": "Corsia centrale su strada urbana",
+    "2": "Corsia centrale in ambito centrale denso",
+    "3": "Corsia laterale accostata al fronte",
+    "4": "Corridoio centrale di trasporto rapido",
+    "5": "Boulevard del trasporto pubblico",
+    "6": "Coppia di corsie parallele"
+  },
+  "qualita": {
+    "nomiDistinti": 339,
+    "nomiConPiuGrafie": 77,
+    "proposteSenzaTipo": 144,
+    "kmSenzaTipo": 74293,
+    "segmentiSotto5m": 4,
+    "maxTratti": 103,
+    "maxLen": 11628
+  }
+}

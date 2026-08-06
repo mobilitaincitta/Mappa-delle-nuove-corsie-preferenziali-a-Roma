@@ -1,0 +1,188 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+/* ---------------------------------------------------------------------------
+   Token shadcn/ui (neutral)
+   --------------------------------------------------------------------------- */
+:root {
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.269 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.371 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 18%);
+  --ring: oklch(0.556 0 0);
+}
+
+/* ---------------------------------------------------------------------------
+   Token di visualizzazione.
+
+   `scenario` è una priorità di attuazione (1 = primo lotto), quindi è una scala
+   ORDINALE: una sola tonalità, tre gradini di luminosità monotoni, non tre
+   colori diversi. Lo scenario 1 è il gradino con più contrasto sulla superficie
+   in entrambe le modalità, così la priorità più alta è anche la più leggibile.
+   Rampa verificata con lo script validate_palette.js (--ordinal): luminosità
+   monotona, gap >= 0.06, estremo chiaro sopra 2:1 sulla superficie.
+
+   Le corsie esistenti non fanno parte della scala: sono contesto, quindi grigio
+   neutro, e TRAM vs PROMISCUO si distinguono per tratteggio, non per colore.
+   --------------------------------------------------------------------------- */
+:root {
+  --viz-surface: #fcfcfb;
+  --viz-ink: #0b0b0b;
+  --viz-ink-2: #52514e;
+  --viz-muted: #898781;
+  --viz-grid: #e1e0d9;
+  --viz-baseline: #c3c2b7;
+
+  --viz-sc1: #184f95;
+  --viz-sc2: #2a78d6;
+  --viz-sc3: #86b6ef;
+  --viz-existing: #898781;
+  --viz-highlight: #eda100;
+}
+
+.dark {
+  --viz-surface: #1a1a19;
+  --viz-ink: #ffffff;
+  --viz-ink-2: #c3c2b7;
+  --viz-muted: #898781;
+  --viz-grid: #2c2c2a;
+  --viz-baseline: #383835;
+
+  --viz-sc1: #9ec5f4;
+  --viz-sc2: #3987e5;
+  --viz-sc3: #184f95;
+  --viz-existing: #898781;
+  --viz-highlight: #eda100;
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-sc1: var(--viz-sc1);
+  --color-sc2: var(--viz-sc2);
+  --color-sc3: var(--viz-sc3);
+  --color-existing: var(--viz-existing);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior: none;
+  }
+
+  /* Le colonne numeriche devono allinearsi in verticale; i numeri grandi
+     delle stat tile restano invece a cifre proporzionali. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* MapLibre: il foglio di stile della libreria porta i suoi controlli, che
+   vanno riportati sui token del tema. */
+@layer components {
+  .maplibregl-ctrl-group {
+    @apply !border !border-border !bg-card !shadow-sm;
+  }
+
+  .maplibregl-ctrl-group button + button {
+    @apply !border-t !border-border;
+  }
+
+  .maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+    filter: var(--maplibre-icon-filter, none);
+  }
+
+  .dark .maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+    filter: invert(1);
+  }
+
+  .maplibregl-ctrl-attrib.maplibregl-compact {
+    @apply !bg-card/90 !text-muted-foreground;
+  }
+
+  .maplibregl-ctrl-attrib a {
+    @apply !text-muted-foreground;
+  }
+
+  .maplibregl-popup-content {
+    @apply !rounded-lg !border !border-border !bg-popover !p-0 !text-popover-foreground !shadow-lg;
+  }
+
+  .maplibregl-popup-tip {
+    display: none;
+  }
+}

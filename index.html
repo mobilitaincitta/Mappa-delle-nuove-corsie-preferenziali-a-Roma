@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Rete di corsie preferenziali proposte per Roma: 208 km di nuove corsie su tre scenari di priorità, messi a confronto con i 114 km esistenti."
+    />
+    <title>Corsie preferenziali di Roma — rete proposta</title>
+    <script>
+      // Applica il tema prima del primo paint, altrimenti la pagina lampeggia
+      // in chiaro prima che React monti.
+      try {
+        var salvato = localStorage.getItem('tema')
+        var scuro = salvato
+          ? salvato === 'dark'
+          : matchMedia('(prefers-color-scheme: dark)').matches
+        document.documentElement.classList.toggle('dark', scuro)
+      } catch (e) {
+        /* localStorage non disponibile: resta il tema chiaro */
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
