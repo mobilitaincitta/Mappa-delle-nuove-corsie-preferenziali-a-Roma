@@ -98,7 +98,6 @@ export function MapView({
       fitBoundsOptions: { padding: 48 },
       style: {
         version: 8,
-        glyphs: undefined,
         sources: {
           basemapChiaro: {
             type: 'raster',
@@ -129,11 +128,33 @@ export function MapView({
         layers: [
           // Le due basi restano entrambe caricate e si alternano per visibilità:
           // cambiare setStyle a ogni cambio tema costringerebbe a ricreare
-          // sorgenti e layer.
-          { id: 'base-chiaro', type: 'raster', source: 'basemapChiaro' },
-          { id: 'base-chiaro-etichette', type: 'raster', source: 'basemapChiaroEtichette' },
-          { id: 'base-scuro', type: 'raster', source: 'basemapScuro' },
-          { id: 'base-scuro-etichette', type: 'raster', source: 'basemapScuroEtichette' },
+          // sorgenti e layer. La visibilità iniziale è dichiarata qui e non
+          // aggiustata dopo `load`, altrimenti fino a quel momento sarebbero
+          // visibili tutte e quattro, con la scura sopra la chiara.
+          {
+            id: 'base-chiaro',
+            type: 'raster',
+            source: 'basemapChiaro',
+            layout: { visibility: scuro ? 'none' : 'visible' },
+          },
+          {
+            id: 'base-chiaro-etichette',
+            type: 'raster',
+            source: 'basemapChiaroEtichette',
+            layout: { visibility: scuro ? 'none' : 'visible' },
+          },
+          {
+            id: 'base-scuro',
+            type: 'raster',
+            source: 'basemapScuro',
+            layout: { visibility: scuro ? 'visible' : 'none' },
+          },
+          {
+            id: 'base-scuro-etichette',
+            type: 'raster',
+            source: 'basemapScuroEtichette',
+            layout: { visibility: scuro ? 'visible' : 'none' },
+          },
 
           // Evidenza sotto le linee: alone che non copre il colore dello scenario.
           {
@@ -216,6 +237,12 @@ export function MapView({
           },
         ],
       },
+    })
+
+    // Senza questo una sorgente che non carica o uno stile non valido
+    // producono una mappa vuota senza alcuna traccia in console.
+    map.on('error', (e) => {
+      console.error('[mappa]', e.error?.message ?? e)
     })
 
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right')
