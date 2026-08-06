@@ -99,7 +99,18 @@ tile di base Esri Canvas (le stesse dell'export originale, con la variante scura
 
 Sito: **https://matteocollotti-code.github.io/corsie-preferenziali-roma/**
 
+Pages serve il branch **`gh-pages`**, che contiene la build. Pages non può
+servire i sorgenti, da qui il passaggio di compilazione. Il `base` in
+`vite.config.ts` vale solo per la build ed è impostato sul nome del repository;
+in sviluppo resta `/`.
+
 Ogni push su `main` fa scattare `.github/workflows/deploy.yml`, che compila e
-pubblica `dist/` su GitHub Pages. Pages non può servire i sorgenti, da qui il
-passaggio di build. Il `base` in `vite.config.ts` vale solo per la build ed è
-impostato sul nome del repository; in sviluppo resta `/`.
+spinge `dist/` su `gh-pages`. Per pubblicare a mano, quando le Actions non sono
+disponibili:
+
+```bash
+npm run build
+cd dist && touch .nojekyll && git init -q && git checkout -b gh-pages \
+  && git add -A && git commit -qm "build" \
+  && git push -f https://github.com/matteocollotti-code/corsie-preferenziali-roma.git gh-pages
+```

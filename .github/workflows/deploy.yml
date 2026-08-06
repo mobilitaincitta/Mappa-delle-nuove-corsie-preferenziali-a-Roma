@@ -1,8 +1,10 @@
 name: Pubblica su GitHub Pages
 
-# L'app va compilata prima di essere servita: Pages non può pubblicare i
-# sorgenti. Il `base` in vite.config.ts vale solo per la build ed è già
-# impostato sul nome del repository.
+# Pages non può servire i sorgenti, quindi il workflow compila e pubblica il
+# contenuto di dist/ sul branch `gh-pages`, che è la sorgente configurata per
+# Pages. Non usa l'API di deploy di Pages: quella richiede la sorgente
+# «GitHub Actions», e con essa una pubblicazione manuale dal locale non sarebbe
+# più possibile.
 
 on:
   push:
@@ -10,17 +12,14 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
-# Un deploy alla volta, e le esecuzioni in coda vengono sostituite dall'ultima.
 concurrency:
   group: pages
   cancel-in-progress: true
 
 jobs:
-  build:
+  pubblica:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -34,18 +33,18 @@ jobs:
 
       - run: npm run build
 
-      - uses: actions/configure-pages@v5
-
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Pubblica dist/ su gh-pages
+        run: |
+          cd dist
+          touch .nojekyll
+          git init -q
+          git checkout -q -b gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Build da ${GITHUB_SHA::7}"
+          git push -q -f \
+            "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+            gh-pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
