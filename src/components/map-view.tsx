@@ -1,5 +1,13 @@
-import { useCallback, useEffect, useImperativeHandle, useRef, type Ref } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+  type Ref,
+} from 'react'
 import maplibregl, { type LngLatBoundsLike, type Map as MapLibreMap } from 'maplibre-gl'
+import { TriangleAlert } from 'lucide-react'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
 import type { Bbox, Dataset, Filtri, PropProposta } from '@/lib/types'
@@ -51,6 +59,20 @@ function leggiColori() {
 
 const VUOTO = { type: 'FeatureCollection' as const, features: [] }
 
+/**
+ * MapLibre richiede WebGL 2. Se manca — accelerazione hardware disattivata,
+ * driver in blocklist, macchina virtuale senza GPU — il costruttore solleva
+ * un'eccezione e l'area della mappa resterebbe bianca senza spiegazione.
+ */
+function webgl2Disponibile(): boolean {
+  try {
+    const canvas = document.createElement('canvas')
+    return !!canvas.getContext('webgl2')
+  } catch {
+    return false
+  }
+}
+
 export function MapView({
   dataset,
   filtri,
@@ -81,9 +103,20 @@ export function MapView({
     else map.once('load', () => azione(map))
   }, [])
 
+  const [guasto, setGuasto] = useState<string | null>(null)
+
   // --- creazione (una sola volta) ---------------------------------------
   useEffect(() => {
     if (!contenitore.current || mappa.current) return
+
+    if (!webgl2Disponibile()) {
+      setGuasto(
+        'Questo browser non espone WebGL 2, necessario per disegnare la mappa. ' +
+          'Di solito succede con l\'accelerazione hardware disattivata: in Chrome ed Edge ' +
+          'sta in Impostazioni → Sistema.'
+      )
+      return
+    }
 
     const colori = leggiColori()
     const bounds: LngLatBoundsLike = [
@@ -302,6 +335,19 @@ export function MapView({
       aggiornaFiltri(map, filtri)
     })
 
+    // Se lo stile non arriva a `load`, l'area resterebbe vuota per sempre senza
+    // dire niente: la causa tipica è la rete che blocca il servizio delle tile.
+    const guardiano = setTimeout(() => {
+      if (!pronta.current) {
+        setGuasto(
+          'La mappa non ha completato il caricamento. Le cause più comuni sono ' +
+            'le tile di sfondo bloccate dalla rete (services.arcgisonline.com) ' +
+            'oppure la scheda rimasta in secondo piano durante l\'apertura. ' +
+            'I dettagli sono in console, con prefisso [mappa].'
+        )
+      }
+    }, 15000)
+
     mappa.current = map
 
     // Aggancio per l'ispezione manuale in sviluppo; non entra nel bundle di
@@ -311,6 +357,7 @@ export function MapView({
     }
 
     return () => {
+      clearTimeout(guardiano)
       popup.current?.remove()
       map.remove()
       mappa.current = null
@@ -386,7 +433,23 @@ export function MapView({
     [dataset, quandoPronta]
   )
 
-  return <div ref={contenitore} className="absolute inset-0" />
+  return (
+    <>
+      <div ref={contenitore} className="absolute inset-0" />
+      {guasto && (
+        <div className="absolute inset-0 z-20 grid place-items-center bg-background/95 p-6">
+          <div className="max-w-sm text-center">
+            <TriangleAlert className="mx-auto size-7 text-muted-foreground" />
+            <p className="mt-3 text-sm font-medium">Mappa non disponibile</p>
+            <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{guasto}</p>
+            <p className="mt-3 text-xs text-muted-foreground">
+              I dati restano consultabili dai pannelli e dalla scheda «Segmenti».
+            </p>
+          </div>
+        </div>
+      )}
+    </>
+  )
 }
 
 // --- aggiornamenti imperativi ---------------------------------------------
