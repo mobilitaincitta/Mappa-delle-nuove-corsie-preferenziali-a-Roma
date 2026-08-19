@@ -231,6 +231,8 @@ export default function App() {
                     onToggleEsistenti={() =>
                       setFiltri((f) => ({ ...f, mostraEsistenti: !f.mostraEsistenti }))
                     }
+                    scuro={scuro}
+                    onAlternaTema={alterna}
                   />
                 </div>
               </>
