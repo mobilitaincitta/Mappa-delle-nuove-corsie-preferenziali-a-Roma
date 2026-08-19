@@ -1,6 +1,6 @@
 {
   "generatoDa": "scripts/build-data.mjs",
-  "fonte": "export qgis2web in legacy/ (mobilitaincitta@f2ccb21)",
+  "fonte": "export qgis2web in legacy/ (mobilitaincitta@f2ccb21), km di sintesi dal piano",
   "bbox": [
     12.277051,
     41.733883,
@@ -9,22 +9,22 @@
   ],
   "proposte": {
     "n": 275,
-    "len": 208252,
+    "len": 159000,
     "perScenario": [
       {
         "key": 1,
         "n": 132,
-        "len": 103258
+        "len": 87000
       },
       {
         "key": 2,
         "n": 101,
-        "len": 71593
+        "len": 53000
       },
       {
         "key": 3,
         "n": 42,
-        "len": 33401
+        "len": 19000
       }
     ],
     "perTipo": [

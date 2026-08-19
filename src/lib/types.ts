@@ -42,6 +42,7 @@ export interface Collezione<P> {
 export interface GruppoKm {
   key: number | string | null
   n: number
+  /** Per le proposte sono i km dichiarati dal piano, non misurati sul tracciato. */
   len: number
 }
 

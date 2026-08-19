@@ -209,14 +209,39 @@ const grafie = contaGrafieIncoerenti(
   proposte.features.concat(esistenti.features).map((f) => f.properties.nome)
 )
 
+/**
+ * Km di piano dichiarati per priorità, in metri.
+ *
+ * Sono le cifre di sintesi del piano e sono l'unica fonte dei km in dashboard:
+ * la lunghezza geodetica delle geometrie dell'export non viene usata, perché il
+ * tracciato della bozza non corrisponde ai km del piano. Se l'export cambia e
+ * compare una priorità non elencata qui, la build si ferma: i km vanno
+ * dichiarati, non dedotti dal disegno.
+ */
+const KM_DICHIARATI = { 1: 87_000, 2: 53_000, 3: 19_000 }
+
+const perScenario = groupKm(proposte.features, 'scenario')
+  .sort((a, b) => a.key - b.key)
+  .map((g) => {
+    const len = KM_DICHIARATI[g.key]
+    if (len == null) {
+      throw new Error(
+        `priorità ${g.key}: nessun km dichiarato in KM_DICHIARATI (build-data.mjs)`
+      )
+    }
+    return { ...g, len }
+  })
+
+const lenProposte = perScenario.reduce((acc, g) => acc + g.len, 0)
+
 const meta = {
   generatoDa: 'scripts/build-data.mjs',
-  fonte: 'export qgis2web in legacy/ (mobilitaincitta@f2ccb21)',
+  fonte: 'export qgis2web in legacy/ (mobilitaincitta@f2ccb21), km di sintesi dal piano',
   bbox: bboxOf([proposte, esistenti]),
   proposte: {
     n: proposte.features.length,
-    len: sum(proposte.features),
-    perScenario: groupKm(proposte.features, 'scenario').sort((a, b) => a.key - b.key),
+    len: lenProposte,
+    perScenario,
     perTipo: groupKm(proposte.features, 'tipoId').sort(
       (a, b) => (a.key ?? 99) - (b.key ?? 99)
     ),

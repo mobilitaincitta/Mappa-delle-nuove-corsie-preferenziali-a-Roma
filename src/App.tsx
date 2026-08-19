@@ -55,10 +55,17 @@ export default function App() {
     )
   }, [dataset, filtri])
 
-  const lenFiltrata = useMemo(
-    () => filtrati.reduce((a, f) => a + f.properties.len, 0),
-    [filtrati]
-  )
+  /**
+   * I km sono quelli dichiarati dal piano in meta, non la somma delle geometrie
+   * della bozza. Il filtro agisce solo sulla priorità, quindi la selezione è
+   * sempre l'unione di scenari interi e il conto torna con il totale.
+   */
+  const lenFiltrata = useMemo(() => {
+    if (!dataset) return 0
+    return dataset.meta.proposte.perScenario
+      .filter((g) => filtri.scenari.has(Number(g.key) as Scenario))
+      .reduce((acc, g) => acc + g.len, 0)
+  }, [dataset, filtri])
 
   const segmento = useMemo(
     () =>
@@ -106,14 +113,14 @@ export default function App() {
           <div className="mr-auto min-w-0">
             <div className="flex items-center gap-2">
               <h1 className="truncate text-sm font-semibold">
-                Corsie preferenziali di Roma
+                Nuove corsie preferenziali a Roma
               </h1>
               <Badge variant="outline" className="shrink-0 text-[10px] font-normal">
                 bozza
               </Badge>
             </div>
             <p className="truncate text-[11px] text-muted-foreground">
-              Rete proposta su tre scenari di priorità, a confronto con quella esistente
+              Proposta di rete su tre scenari di priorità
             </p>
           </div>
           {dataset && (

@@ -1,7 +1,13 @@
-# Corsie preferenziali di Roma — dashboard della rete proposta
+# Nuove corsie preferenziali a Roma — dashboard della proposta di rete
 
-Dashboard della rete di corsie preferenziali proposte per Roma: 208,3 km di nuove
-corsie su tre scenari di priorità, messi a confronto con i 114,4 km esistenti.
+Dashboard della rete di corsie preferenziali proposte per Roma: 159 km di nuove
+corsie su tre scenari di priorità (87 + 53 + 19 km), messi a confronto con i
+114,4 km esistenti.
+
+I km di sintesi sono quelli dichiarati dal piano, impostati in `KM_DICHIARATI`
+dentro [`scripts/build-data.mjs`](scripts/build-data.mjs): non vengono misurati
+sulle geometrie della bozza, che in mappa sono ancora quelle dell'export
+originale.
 
 ## Provenienza dei dati
 
