@@ -8,7 +8,7 @@ export default defineConfig(({ command }) => ({
   // gli asset non possono essere referenziati dalla radice del dominio. In
   // sviluppo invece il base va lasciato su '/': altrimenti l'app risponde solo
   // su localhost:<porta>/corsie-preferenziali-roma/ e la radice sembra vuota.
-  base: command === 'build' ? '/corsie-preferenziali-roma/' : '/',
+  base: command === 'build' ? '/Mappa-delle-nuove-corsie-preferenziali-a-Roma/' : '/',
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: { '@': path.resolve(__dirname, './src') },
