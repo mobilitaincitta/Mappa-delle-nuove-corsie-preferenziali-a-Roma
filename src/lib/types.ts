@@ -64,16 +64,40 @@ export interface Meta {
   }
 }
 
+export interface PropLineaMetro {
+  /** A, B o C. Il ramo B1 e' taggato B in OSM e resta accorpato alla B. */
+  ref: string
+  nome: string
+  /** Colore della segnaletica ATAC, uguale nei due temi. */
+  colore: string
+}
+
+export interface PropStazioneMetro {
+  nome: string
+  /** Linee che la servono, separate da «·»: «A·B» a Termini. */
+  linee: string
+  interscambio: boolean
+  colore: string
+}
+
+export interface Metro {
+  linee: Collezione<PropLineaMetro>
+  stazioni: Collezione<PropStazioneMetro>
+  fonte: string
+}
+
 export interface Dataset {
   proposte: Collezione<PropProposta>
   esistenti: Collezione<PropEsistente>
   meta: Meta
+  metro: Metro
 }
 
 /** Stato dei filtri, condiviso da mappa, KPI e tabella. */
 export interface Filtri {
   scenari: Set<Scenario>
   mostraEsistenti: boolean
+  mostraMetro: boolean
 }
 
 export type Bbox = [number, number, number, number]

@@ -35,6 +35,7 @@ export default function App() {
   const [filtri, setFiltri] = useState<Filtri>({
     scenari: new Set(TUTTI_SCENARI),
     mostraEsistenti: true,
+    mostraMetro: true,
   })
 
   useEffect(() => {
@@ -230,6 +231,10 @@ export default function App() {
                     mostraEsistenti={filtri.mostraEsistenti}
                     onToggleEsistenti={() =>
                       setFiltri((f) => ({ ...f, mostraEsistenti: !f.mostraEsistenti }))
+                    }
+                    mostraMetro={filtri.mostraMetro}
+                    onToggleMetro={() =>
+                      setFiltri((f) => ({ ...f, mostraMetro: !f.mostraMetro }))
                     }
                     scuro={scuro}
                     onAlternaTema={alterna}

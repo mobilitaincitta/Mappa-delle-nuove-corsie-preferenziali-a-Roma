@@ -40,8 +40,10 @@ const BASEMAP = {
 const tile = (servizio: string) =>
   `https://services.arcgisonline.com/ArcGIS/rest/services/${servizio}/MapServer/tile/{z}/{y}/{x}`
 
+// Il dato della metropolitana viene da OpenStreetMap, che e' sotto ODbL:
+// l'attribuzione non e' una cortesia, e' una condizione della licenza.
 const ATTRIBUZIONE =
-  'Tile &copy; Esri &middot; rete proposta: <a href="https://github.com/mobilitaincitta" target="_blank" rel="noreferrer">Mobilità in Città</a>'
+  'Tile &copy; Esri &middot; metro &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> &middot; rete proposta: <a href="https://github.com/mobilitaincitta" target="_blank" rel="noreferrer">Mobilità in Città</a>'
 
 /** Legge i colori dai token CSS, così tema e mappa non divergono mai. */
 function leggiColori() {
@@ -85,6 +87,7 @@ export function MapView({
   const mappa = useRef<MapLibreMap | null>(null)
   const pronta = useRef(false)
   const popup = useRef<maplibregl.Popup | null>(null)
+  const etichetteMetro = useRef<maplibregl.Marker[]>([])
   const onSelezioneRef = useRef(onSelezione)
   onSelezioneRef.current = onSelezione
 
@@ -102,6 +105,11 @@ export function MapView({
     if (pronta.current) azione(map)
     else map.once('load', () => azione(map))
   }, [])
+
+  // Il gestore di 'zoom' viene registrato una volta sola e catturerebbe il
+  // valore iniziale del filtro: qui ne legge sempre l'ultimo.
+  const mostraMetroRef = useRef(filtri.mostraMetro)
+  mostraMetroRef.current = filtri.mostraMetro
 
   const [guasto, setGuasto] = useState<string | null>(null)
   /** Vero finché l'inquadratura è ancora quella automatica di partenza. */
@@ -161,6 +169,8 @@ export function MapView({
             tiles: [tile(BASEMAP.scuroEtichette)],
             tileSize: 256,
           },
+          metroLinee: { type: 'geojson', data: dataset.metro.linee as never },
+          metroStazioni: { type: 'geojson', data: dataset.metro.stazioni as never },
           esistenti: { type: 'geojson', data: dataset.esistenti as never },
           proposte: { type: 'geojson', data: dataset.proposte as never },
           evidenza: { type: 'geojson', data: VUOTO },
@@ -194,6 +204,57 @@ export function MapView({
             type: 'raster',
             source: 'basemapScuroEtichette',
             layout: { visibility: scuro ? 'visible' : 'none' },
+          },
+
+          // Metropolitana: contesto, quindi sta sotto tutto il resto della rete.
+          // I colori vengono dal dato (tag `colour` di OSM, cioe' la segnaletica
+          // ATAC) e non dai token del tema: l'arancione della A resta arancione
+          // anche di notte, altrimenti la linea non si riconosce piu'.
+          {
+            id: 'metro-alone',
+            type: 'line',
+            source: 'metroLinee',
+            paint: {
+              'line-color': colori.superficie,
+              'line-width': ['interpolate', ['linear'], ['zoom'], 10, 3, 16, 8],
+              'line-opacity': 0.75,
+            },
+            layout: {
+              'line-cap': 'round',
+              'line-join': 'round',
+              visibility: filtri.mostraMetro ? 'visible' : 'none',
+            },
+          },
+          {
+            id: 'metro-linea',
+            type: 'line',
+            source: 'metroLinee',
+            paint: {
+              'line-color': ['get', 'colore'],
+              'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1.4, 16, 4],
+              'line-opacity': 0.9,
+            },
+            layout: {
+              'line-cap': 'round',
+              'line-join': 'round',
+              visibility: filtri.mostraMetro ? 'visible' : 'none',
+            },
+          },
+          {
+            id: 'metro-stazione',
+            type: 'circle',
+            source: 'metroStazioni',
+            paint: {
+              'circle-color': colori.superficie,
+              'circle-stroke-color': ['get', 'colore'],
+              'circle-radius': [
+                'interpolate', ['linear'], ['zoom'],
+                10, ['case', ['get', 'interscambio'], 3, 1.8],
+                16, ['case', ['get', 'interscambio'], 6.5, 4.5],
+              ],
+              'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 10, 1, 16, 2.2],
+            },
+            layout: { visibility: filtri.mostraMetro ? 'visible' : 'none' },
           },
 
           // Evidenza sotto le linee: alone che non copre il colore dello scenario.
@@ -338,6 +399,8 @@ export function MapView({
 
     map.on('load', () => {
       pronta.current = true
+      etichetteMetro.current = creaEtichette(map, dataset)
+      aggiornaEtichette(map, etichetteMetro.current, filtri.mostraMetro)
       aggiornaTema(map, scuro)
       aggiornaFiltri(map, filtri)
       // Il fit passato al costruttore usa la dimensione che il contenitore ha in
@@ -384,6 +447,10 @@ export function MapView({
     const cedi = () => {
       autoInquadra.current = false
     }
+    map.on('zoom', () =>
+      aggiornaEtichette(map, etichetteMetro.current, mostraMetroRef.current)
+    )
+
     map.on('dragstart', cedi)
     map.on('wheel', cedi)
     map.on('dblclick', cedi)
@@ -400,6 +467,8 @@ export function MapView({
       osservatore.disconnect()
       clearTimeout(guardiano)
       popup.current?.remove()
+      for (const m of etichetteMetro.current) m.remove()
+      etichetteMetro.current = []
       map.remove()
       mappa.current = null
       pronta.current = false
@@ -415,7 +484,10 @@ export function MapView({
 
   // --- filtri ------------------------------------------------------------
   useEffect(() => {
-    quandoPronta((map) => aggiornaFiltri(map, filtri))
+    quandoPronta((map) => {
+      aggiornaFiltri(map, filtri)
+      aggiornaEtichette(map, etichetteMetro.current, filtri.mostraMetro)
+    })
   }, [filtri, quandoPronta])
 
   // --- segmento selezionato ---------------------------------------------
@@ -503,6 +575,34 @@ export function MapView({
   )
 }
 
+// --- etichette delle stazioni ---------------------------------------------
+
+/** Sotto questo zoom i nomi si accavallerebbero: restano solo i pallini. */
+const ZOOM_ETICHETTE = 12.5
+
+function creaEtichette(map: MapLibreMap, dataset: Dataset) {
+  return dataset.metro.stazioni.features.map((f) => {
+    const el = document.createElement('div')
+    el.className = 'metro-etichetta'
+    el.textContent = f.properties.nome
+    const [lon, lat] = f.geometry.coordinates as unknown as [number, number]
+    return new maplibregl.Marker({ element: el, anchor: 'left' })
+      .setLngLat([lon, lat])
+      .addTo(map)
+  })
+}
+
+function aggiornaEtichette(
+  map: MapLibreMap,
+  marker: maplibregl.Marker[],
+  mostraMetro: boolean
+) {
+  const visibili = mostraMetro && map.getZoom() >= ZOOM_ETICHETTE
+  for (const m of marker) {
+    m.getElement().style.display = visibili ? '' : 'none'
+  }
+}
+
 // --- aggiornamenti imperativi ---------------------------------------------
 
 function aggiornaTema(map: MapLibreMap, scuro: boolean) {
@@ -537,6 +637,15 @@ function aggiornaTema(map: MapLibreMap, scuro: boolean) {
   if (map.getLayer('evidenza')) {
     map.setPaintProperty('evidenza', 'line-color', colori.evidenza)
   }
+  // I colori di linea restano quelli della segnaletica; a cambiare col tema
+  // sono solo l'alone e il riempimento dei pallini, che devono staccare dalla
+  // basemap chiara come da quella scura.
+  if (map.getLayer('metro-alone')) {
+    map.setPaintProperty('metro-alone', 'line-color', colori.superficie)
+  }
+  if (map.getLayer('metro-stazione')) {
+    map.setPaintProperty('metro-stazione', 'circle-color', colori.superficie)
+  }
 }
 
 function aggiornaFiltri(map: MapLibreMap, filtri: Filtri) {
@@ -550,6 +659,12 @@ function aggiornaFiltri(map: MapLibreMap, filtri: Filtri) {
   for (const id of ['esistenti-promiscuo', 'esistenti-tram']) {
     if (map.getLayer(id)) {
       map.setLayoutProperty(id, 'visibility', filtri.mostraEsistenti ? 'visible' : 'none')
+    }
+  }
+
+  for (const id of ['metro-alone', 'metro-linea', 'metro-stazione']) {
+    if (map.getLayer(id)) {
+      map.setLayoutProperty(id, 'visibility', filtri.mostraMetro ? 'visible' : 'none')
     }
   }
 }

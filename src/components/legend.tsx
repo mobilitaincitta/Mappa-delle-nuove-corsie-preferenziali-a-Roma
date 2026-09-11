@@ -6,9 +6,18 @@ import { cn } from '@/lib/utils'
 interface Props {
   mostraEsistenti: boolean
   onToggleEsistenti: () => void
+  mostraMetro: boolean
+  onToggleMetro: () => void
   scuro: boolean
   onAlternaTema: () => void
 }
+
+/** Le tre linee, con i colori della segnaletica presi dai token CSS. */
+const LINEE_METRO = [
+  { ref: 'A', variabile: 'var(--metro-a)' },
+  { ref: 'B', variabile: 'var(--metro-b)' },
+  { ref: 'C', variabile: 'var(--metro-c)' },
+]
 
 /**
  * Legenda sovrapposta alla mappa. L'identità non è mai affidata al solo colore:
@@ -18,6 +27,8 @@ interface Props {
 export function Legend({
   mostraEsistenti,
   onToggleEsistenti,
+  mostraMetro,
+  onToggleMetro,
   scuro,
   onAlternaTema,
 }: Props) {
@@ -50,6 +61,37 @@ export function Legend({
       <div className={cn('mt-1.5 grid gap-1.5', !mostraEsistenti && 'opacity-40')}>
         <Voce classe="bg-existing" testo="Promiscuo" />
         <Voce classe="bg-existing" testo="Tram" tratteggiata />
+      </div>
+
+      {/* La metropolitana non fa parte del piano: è il riferimento con cui si
+          legge la mappa, quindi ha una riga propria e si può spegnere. */}
+      <div className="mt-3 flex items-center justify-between border-t pt-2.5">
+        <span className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+          Metropolitana
+        </span>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onToggleMetro}
+          className="-mr-1.5 h-6 gap-1 px-1.5 text-[11px] font-normal text-muted-foreground"
+          aria-pressed={mostraMetro}
+        >
+          {mostraMetro ? <Eye className="size-3" /> : <EyeOff className="size-3" />}
+          {mostraMetro ? 'visibile' : 'nascosta'}
+        </Button>
+      </div>
+      <div className={cn('mt-1.5 flex items-center gap-1.5', !mostraMetro && 'opacity-40')}>
+        {LINEE_METRO.map((l) => (
+          <span
+            key={l.ref}
+            className="metro-bollino"
+            style={{ backgroundColor: l.variabile }}
+            title={`Linea ${l.ref}`}
+          >
+            {l.ref}
+          </span>
+        ))}
+        <span className="ml-0.5 text-[10px] text-muted-foreground">linee e stazioni</span>
       </div>
 
       {/* Lo stesso comando sta anche nell'header, ma lì è un'icona sola in cima

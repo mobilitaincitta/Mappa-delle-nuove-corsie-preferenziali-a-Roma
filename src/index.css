@@ -94,6 +94,34 @@
   --viz-highlight: #eda100;
 }
 
+/*
+ * Metropolitana.
+ *
+ * I colori sono quelli della segnaletica ATAC, presi dai tag `colour` di OSM e
+ * identici nei due temi: sono un'identita' di linea, non una scelta grafica,
+ * e cambiarli al buio li renderebbe irriconoscibili.
+ *
+ * Il font istituzionale di Roma Capitale e' Urbs, disegnato da Inarea: e'
+ * proprietario e non ridistribuibile, quindi qui non c'e'. Se lo si licenzia,
+ * bastano il blocco @font-face qui sotto e i file in public/fonts/ perche'
+ * entri in uso ovunque: la pila lo nomina per primo e le etichette delle
+ * stazioni, la legenda e i bollini di linea leggono tutti questa variabile.
+ *
+ * @font-face {
+ *   font-family: 'Urbs';
+ *   src: url('/fonts/Urbs-Regular.woff2') format('woff2');
+ *   font-weight: 400;
+ *   font-display: swap;
+ * }
+ */
+:root {
+  --metro-a: #f68b1f;
+  --metro-b: #3783c6;
+  --metro-c: #008751;
+  --font-metro: 'Urbs', 'Urbs Display', 'Titillium Web', system-ui, -apple-system, 'Segoe UI',
+    sans-serif;
+}
+
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -124,6 +152,52 @@
   --color-sc2: var(--viz-sc2);
   --color-sc3: var(--viz-sc3);
   --color-existing: var(--viz-existing);
+
+  --color-metro-a: var(--metro-a);
+  --color-metro-b: var(--metro-b);
+  --color-metro-c: var(--metro-c);
+}
+
+/*
+ * Etichette delle stazioni.
+ *
+ * Sono marker HTML e non un layer `symbol` di MapLibre, per due motivi: lo
+ * stile della mappa non dichiara un endpoint `glyphs`, e senza quello MapLibre
+ * non disegna testo; e soprattutto un layer symbol userebbe font compilati in
+ * PBF, mentre cosi' l'etichetta usa la stessa pila CSS del resto — cioe' Urbs,
+ * appena lo si aggiunge.
+ */
+.metro-etichetta {
+  font-family: var(--font-metro);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  color: var(--viz-ink);
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translate(10px, -50%);
+  /* Contorno nel colore della superficie: il nome resta leggibile sopra le
+     tile chiare e scure senza bisogno di un riquadro pieno, che coprirebbe
+     la rete sottostante. */
+  text-shadow:
+    -2px 0 var(--viz-surface), 2px 0 var(--viz-surface), 0 -2px var(--viz-surface),
+    0 2px var(--viz-surface), -1.5px -1.5px var(--viz-surface), 1.5px -1.5px var(--viz-surface),
+    -1.5px 1.5px var(--viz-surface), 1.5px 1.5px var(--viz-surface);
+}
+
+/* Bollino di linea: la pastiglia A / B / C della segnaletica. */
+.metro-bollino {
+  font-family: var(--font-metro);
+  display: inline-grid;
+  place-items: center;
+  width: 1.05rem;
+  height: 1.05rem;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
 }
 
 @layer base {

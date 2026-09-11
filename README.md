@@ -9,6 +9,33 @@ dentro [`scripts/build-data.mjs`](scripts/build-data.mjs): non vengono misurati
 sulle geometrie della bozza, che in mappa sono ancora quelle dell'export
 originale.
 
+## Metropolitana
+
+Le linee A, B/B1 e C e le 71 stazioni vengono da OpenStreetMap, scaricate con
+[`scripts/build-metro.mjs`](scripts/build-metro.mjs) (`npm run metro`) e salvate
+in `public/data/metro.json`. I colori sono quelli della segnaletica ATAC, presi
+dai tag `colour` delle relazioni, e restano identici nei due temi: sono
+un'identita' di linea, non una scelta grafica.
+
+Il ramo B1 e' taggato `ref=B` in OSM e resta accorpato alla B. Le stazioni non
+si ricavano dai membri delle relazioni — quei nodi sono punti di fermata sul
+binario, senza nome — ma dai nodi `station=subway` tenuti solo se entro 150 m da
+una delle tre linee: lo stesso criterio esclude la Metromare, taggata allo stesso
+modo, e assegna le linee a ciascuna stazione, cosi' i tre interscambi (Termini,
+San Giovanni, Colosseo) risultano dal dato.
+
+Il dato OSM e' sotto ODbL: l'attribuzione in mappa e' una condizione della licenza.
+
+### Il font
+
+Il carattere istituzionale di Roma Capitale e' **Urbs**, disegnato da Inarea. E'
+proprietario e non ridistribuibile, quindi nel repository non c'e'. La variabile
+`--font-metro` in [`src/index.css`](src/index.css) lo nomina comunque per primo:
+chi ne ha la licenza mette i file in `public/fonts/` e toglie il commento al
+blocco `@font-face` accanto alla variabile, e le etichette delle stazioni, i
+bollini di linea e la legenda passano a Urbs senza altre modifiche. Senza quei
+file vale il ripiego della pila.
+
 ## Provenienza dei dati
 
 I dati vengono da un export qgis2web di
