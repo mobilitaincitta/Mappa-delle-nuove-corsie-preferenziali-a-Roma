@@ -85,10 +85,9 @@ Le corsie **esistenti** sono contesto, non soggetto: grigio neutro, con TRAM e
 PROMISCUO distinti dal tratteggio e non dal colore, così il blu significa una cosa
 sola in tutta la dashboard.
 
-L'unico filtro è quello per scenario. La tipologia di corsia (`Ty_CP`) resta
-visibile sul singolo segmento — nella tabella e nel pannello di dettaglio — ma non
-ha un proprio pannello di filtro: su 275 segmenti è indicata solo per 131, quindi
-come dimensione di analisi vale poco.
+L'unico filtro è quello per scenario. La tipologia di intervento (`Ty_CP`
+nell'export) non viene riportata: resta nel dato di origine in `legacy/`, ma non
+entra né nel GeoJSON né nell'interfaccia.
 
 ## Limiti del dato di partenza
 
@@ -96,14 +95,12 @@ Sono dichiarati in dashboard, non nascosti:
 
 | Rilievo | Valore |
 |---|---|
-| Proposte senza tipologia (`Ty_CP` vuoto) | 144 feature su 275, pari a 74,3 km |
 | Nomi con più grafie | 77 su 339 (`Via Tiburtina` / `via tiburtina` / `VIA TIBURTINA`) |
 | Geometrie sotto i 5 m | 4 |
 | Feature più estesa | 11,6 km in 103 parti, probabile unione di più strade |
 
 Le lunghezze non esistono nell'export: sono calcolate qui dalla geometria
-(haversine su WGS84). Le glosse italiane delle tipologie NACTO sono una traduzione
-di servizio e **vanno confermate** con chi ha redatto il piano.
+(haversine su WGS84).
 
 ## Sviluppo
 
@@ -120,7 +117,7 @@ npm run data
 ```
 
 Lo script legge le assegnazioni JavaScript di qgis2web, uniforma i nomi dei campi
-(`STRADA`/`TIPO_USO` negli esistenti, `strada`/`scenario`/`Ty_CP` nelle proposte),
+(`STRADA`/`TIPO_USO` negli esistenti, `strada`/`scenario` nelle proposte),
 calcola lunghezze e aggregati e scrive in `public/data/`.
 
 ## Stack

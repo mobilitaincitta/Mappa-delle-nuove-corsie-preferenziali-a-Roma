@@ -373,9 +373,6 @@ export function MapView({
              <div class="mt-1 text-muted-foreground">
                Scenario ${p.scenario} · ${formattaLunghezza(Number(p.len))}
              </div>
-             <div class="mt-0.5 text-muted-foreground">${
-               p.tipo ? escapeHtml(String(p.tipo)) : 'tipologia non indicata'
-             }</div>
            </div>`
         )
         .addTo(map)

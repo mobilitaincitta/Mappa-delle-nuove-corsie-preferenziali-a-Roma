@@ -26,43 +26,6 @@
         "n": 42,
         "len": 19000
       }
-    ],
-    "perTipo": [
-      {
-        "key": 1,
-        "n": 9,
-        "len": 5376
-      },
-      {
-        "key": 2,
-        "n": 57,
-        "len": 56377
-      },
-      {
-        "key": 3,
-        "n": 46,
-        "len": 34015
-      },
-      {
-        "key": 4,
-        "n": 11,
-        "len": 31973
-      },
-      {
-        "key": 5,
-        "n": 4,
-        "len": 3979
-      },
-      {
-        "key": 6,
-        "n": 4,
-        "len": 2239
-      },
-      {
-        "key": null,
-        "n": 144,
-        "len": 74293
-      }
     ]
   },
   "esistenti": {
@@ -81,19 +44,9 @@
       }
     ]
   },
-  "glosse": {
-    "1": "Corsia centrale su strada urbana",
-    "2": "Corsia centrale in ambito centrale denso",
-    "3": "Corsia laterale accostata al fronte",
-    "4": "Corridoio centrale di trasporto rapido",
-    "5": "Boulevard del trasporto pubblico",
-    "6": "Coppia di corsie parallele"
-  },
   "qualita": {
     "nomiDistinti": 339,
     "nomiConPiuGrafie": 77,
-    "proposteSenzaTipo": 144,
-    "kmSenzaTipo": 74293,
     "segmentiSotto5m": 4,
     "maxTratti": 103,
     "maxLen": 11628

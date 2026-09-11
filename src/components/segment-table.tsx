@@ -110,10 +110,11 @@ export function SegmentTable({ segmenti, selezionato, onSeleziona }: Props) {
               >
                 <TableCell className="max-w-0">
                   <div className="truncate font-medium">{p.nome}</div>
-                  <div className="truncate text-[11px] text-muted-foreground">
-                    {p.glossa ?? p.tipo ?? 'tipologia non indicata'}
-                    {p.tratti > 1 && ` · ${formattaNumero(p.tratti)} tratti`}
-                  </div>
+                  {p.tratti > 1 && (
+                    <div className="truncate text-[11px] text-muted-foreground">
+                      {formattaNumero(p.tratti)} tratti
+                    </div>
+                  )}
                 </TableCell>
                 <TableCell>
                   <span className="flex items-center gap-1.5">

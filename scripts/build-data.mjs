@@ -10,7 +10,10 @@
  *  - `len`, lunghezza geodetica in metri (l'export non la contiene);
  *  - `tratti`, numero di parti della MultiLineString;
  *  - nomi di campo uniformi tra i due layer, che nell'originale differiscono
- *    (STRADA/TIPO_USO negli esistenti, strada/scenario/Ty_CP nelle proposte).
+ *    (STRADA/TIPO_USO negli esistenti, strada/scenario nelle proposte).
+ *
+ * La tipologia di intervento (Ty_CP) non viene riportata: resta nel dato di
+ * origine in legacy/, ma fuori dalla dashboard.
  *
  * Uso: npm run data
  */
@@ -89,31 +92,6 @@ function bboxOf(collections) {
   return bbox
 }
 
-// --- tipologie -------------------------------------------------------------
-
-/**
- * `Ty_CP` contiene sigle in inglese della Transit Street Design Guide di NACTO
- * ("2 - DowntownMedianTS"). L'etichetta originale resta il riferimento; la glossa
- * italiana è una traduzione di servizio per la lettura in dashboard e va
- * confermata con chi ha redatto il piano.
- */
-const GLOSSE = {
-  1: 'Corsia centrale su strada urbana',
-  2: 'Corsia centrale in ambito centrale denso',
-  3: 'Corsia laterale accostata al fronte',
-  4: 'Corridoio centrale di trasporto rapido',
-  5: 'Boulevard del trasporto pubblico',
-  6: 'Coppia di corsie parallele',
-}
-
-function parseTipo(raw) {
-  if (raw == null || raw === '') return { tipoId: null, tipo: null, glossa: null }
-  const match = String(raw).match(/^\s*(\d+)\s*-\s*(.+)$/)
-  if (!match) return { tipoId: null, tipo: String(raw).trim(), glossa: null }
-  const tipoId = Number(match[1])
-  return { tipoId, tipo: match[2].trim(), glossa: GLOSSE[tipoId] ?? null }
-}
-
 // --- costruzione -----------------------------------------------------------
 
 const esistentiRaw = loadLayer(
@@ -128,7 +106,6 @@ const proposteRaw = loadLayer(
 const proposte = {
   type: 'FeatureCollection',
   features: proposteRaw.features.map((feature, i) => {
-    const { tipoId, tipo, glossa } = parseTipo(feature.properties.Ty_CP)
     return {
       type: 'Feature',
       id: i,
@@ -136,9 +113,6 @@ const proposte = {
         id: i,
         nome: String(feature.properties.strada ?? '').trim(),
         scenario: Number(feature.properties.scenario),
-        tipoId,
-        tipo,
-        glossa,
         len: Math.round(lengthOf(feature.geometry)),
         tratti: partsOf(feature.geometry).length,
       },
@@ -242,23 +216,17 @@ const meta = {
     n: proposte.features.length,
     len: lenProposte,
     perScenario,
-    perTipo: groupKm(proposte.features, 'tipoId').sort(
-      (a, b) => (a.key ?? 99) - (b.key ?? 99)
-    ),
   },
   esistenti: {
     n: esistenti.features.length,
     len: sum(esistenti.features),
     perUso: groupKm(esistenti.features, 'uso').sort((a, b) => b.len - a.len),
   },
-  glosse: GLOSSE,
   // Anomalie rilevate sul dato di partenza, mostrate in dashboard invece di
   // essere nascoste: il lettore deve sapere quanto del piano non è tipizzato.
   qualita: {
     nomiDistinti: grafie.nomiDistinti,
     nomiConPiuGrafie: grafie.conPiuGrafie,
-    proposteSenzaTipo: proposte.features.filter((f) => f.properties.tipoId === null).length,
-    kmSenzaTipo: sum(proposte.features, (f) => f.properties.tipoId === null),
     segmentiSotto5m: proposte.features
       .concat(esistenti.features)
       .filter((f) => f.properties.len < 5).length,
@@ -283,7 +251,5 @@ console.log(
   (meta.proposte.len / 1000).toFixed(1),
   'km | esistenti:',
   (meta.esistenti.len / 1000).toFixed(1),
-  'km | senza tipologia:',
-  (meta.qualita.kmSenzaTipo / 1000).toFixed(1),
   'km'
 )

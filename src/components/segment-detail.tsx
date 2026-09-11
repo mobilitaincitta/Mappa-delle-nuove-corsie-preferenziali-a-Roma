@@ -60,32 +60,22 @@ export function SegmentDetail({ segmento, omonimi, onChiudi, onInquadra, onVaiA 
         )}
       </div>
 
-      <Separator className="my-3" />
-
-      <dl className="grid gap-2 text-[13px]">
-        <Riga etichetta="Tipologia">
-          {p.tipo ? (
-            <span>
-              {p.glossa ?? p.tipo}
-              {p.glossa && (
-                <span className="mt-0.5 block text-[11px] text-muted-foreground">
-                  {p.tipo} · {p.tipoId}
-                </span>
-              )}
-            </span>
-          ) : (
-            <span className="text-muted-foreground italic">non indicata nel dato</span>
-          )}
-        </Riga>
-        {p.len < 5 && (
-          <Riga etichetta="Nota">
-            <span className="text-muted-foreground">
-              Geometria di lunghezza trascurabile: probabile residuo di
-              digitalizzazione.
-            </span>
-          </Riga>
-        )}
-      </dl>
+      {/* Senza la tipologia resta solo l'avviso sulle geometrie trascurabili:
+          separatore e lista compaiono con lui, altrimenti la scheda finirebbe
+          con una riga vuota. */}
+      {p.len < 5 && (
+        <>
+          <Separator className="my-3" />
+          <dl className="grid gap-2 text-[13px]">
+            <Riga etichetta="Nota">
+              <span className="text-muted-foreground">
+                Geometria di lunghezza trascurabile: probabile residuo di
+                digitalizzazione.
+              </span>
+            </Riga>
+          </dl>
+        </>
+      )}
 
       <Button variant="outline" size="sm" onClick={onInquadra} className="mt-3 h-8 gap-1.5">
         <Crosshair className="size-3.5" />
