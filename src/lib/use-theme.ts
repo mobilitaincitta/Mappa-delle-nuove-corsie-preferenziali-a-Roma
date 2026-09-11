@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react'
 
 /**
  * Il tema è già applicato dallo script inline in index.html prima del primo
@@ -10,7 +10,17 @@ export function useTheme() {
     document.documentElement.classList.contains('dark')
   )
 
-  useEffect(() => {
+  /**
+   * Layout effect, non effect: la classe deve essere sul documento prima che i
+   * figli leggano i token CSS.
+   *
+   * React esegue gli effetti dal basso verso l'alto, quindi l'effetto di
+   * MapView — che e' figlio — girava prima di questo e leggeva i colori del
+   * tema precedente: l'alone delle corsie restava chiaro sul tema scuro e
+   * viceversa, sfasato di uno a ogni cambio. Gli effetti di layout del padre
+   * girano invece prima degli effetti passivi dei figli.
+   */
+  useLayoutEffect(() => {
     document.documentElement.classList.toggle('dark', scuro)
     try {
       localStorage.setItem('tema', scuro ? 'dark' : 'light')
