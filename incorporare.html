@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Incorporare la mappa — Nuove corsie preferenziali a Roma</title>
+<meta name="description" content="La mappa delle nuove corsie preferenziali di Roma, incorporata dentro una pagina del sito.">
+<meta name="robots" content="noindex">
+<style>
+  :root {
+    color-scheme: light dark;
+    --sfondo: #fcfcfb;
+    --carta: #ffffff;
+    --inchiostro: #0b0b0b;
+    --inchiostro-2: #52514e;
+    --bordo: #e1e0d9;
+    --accento: #184f95;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --sfondo: #1a1a19;
+      --carta: #222220;
+      --inchiostro: #ffffff;
+      --inchiostro-2: #c3c2b7;
+      --bordo: #383835;
+      --accento: #9ec5f4;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--sfondo);
+    color: var(--inchiostro);
+    font: 16px/1.65 system-ui, -apple-system, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .foglio { max-width: 1140px; margin: 0 auto; padding: 40px 24px 72px; }
+
+  header { border-bottom: 1px solid var(--bordo); padding-bottom: 20px; margin-bottom: 32px; }
+  h1 { font-size: 26px; line-height: 1.25; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .occhiello {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--inchiostro-2); margin: 0 0 10px;
+  }
+  p { margin: 0 0 14px; color: var(--inchiostro-2); max-width: 68ch; }
+  p strong { color: var(--inchiostro); font-weight: 600; }
+  a { color: var(--accento); }
+
+  .cornice {
+    height: 700px; border: 1px solid var(--bordo); border-radius: 10px;
+    overflow: hidden; background: var(--carta); margin: 22px 0 8px;
+  }
+  .cornice iframe { width: 100%; height: 100%; border: 0; display: block; }
+  .didascalia { font-size: 12.5px; color: var(--inchiostro-2); margin: 0 0 8px; }
+
+  footer {
+    margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--bordo);
+    font-size: 13px; color: var(--inchiostro-2);
+  }
+</style>
+</head>
+<body>
+<div class="foglio">
+
+  <header>
+    <p class="occhiello">Nuove corsie preferenziali a Roma</p>
+    <h1>Incorporare la mappa in una pagina del sito</h1>
+    <p style="margin:0">
+      La dashboard è una pagina statica e si può inserire in qualunque sito con un
+      <code>&lt;iframe&gt;</code>. Qui sotto è incorporata davvero: quella che segue non è
+      un'immagine, è la mappa che funziona dentro questa pagina.
+    </p>
+  </header>
+
+  <div class="cornice">
+    <iframe
+      src="https://mobilitaincitta.github.io/Mappa-delle-nuove-corsie-preferenziali-a-Roma/"
+      title="Nuove corsie preferenziali a Roma"
+      loading="lazy"></iframe>
+  </div>
+  <p class="didascalia">
+    Riquadro da 700 px di altezza.
+    <a href="https://mobilitaincitta.github.io/Mappa-delle-nuove-corsie-preferenziali-a-Roma/" target="_blank" rel="noreferrer">Apri la mappa a pagina intera →</a>
+  </p>
+
+  <footer>
+    Mappa della rete proposta — <strong>bozza</strong>, non un piano approvato.
+    Dati: elaborazione di <a href="https://github.com/mobilitaincitta" target="_blank" rel="noreferrer">Mobilità in Città</a>;
+    metropolitana © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a>;
+    tile © Esri.
+  </footer>
+
+</div>
+</body>
+</html>
