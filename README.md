@@ -36,6 +36,28 @@ blocco `@font-face` accanto alla variabile, e le etichette delle stazioni, i
 bollini di linea e la legenda passano a Urbs senza altre modifiche. Senza quei
 file vale il ripiego della pila.
 
+## Incorporare la mappa in un altro sito
+
+La dashboard sta in un `<iframe>` senza alcuna configurazione: GitHub Pages non
+manda `X-Frame-Options` ne' CSP, e il foglio di stile mette `height: 100%` su
+`html, body, #root`, quindi l'app riempie il riquadro che le si da'.
+
+La pagina [`public/incorporare.html`](public/incorporare.html) e' l'esempio da
+mostrare a chi cura il sito: contiene la mappa incorporata dal vivo, il codice da
+incollare e le misure. Essendo in `public/` viene copiata tale e quale nella
+build, quindi e' pubblicata accanto alla mappa:
+
+    https://mobilitaincitta.github.io/Mappa-delle-nuove-corsie-preferenziali-a-Roma/incorporare.html
+
+La larghezza conta piu' dell'altezza: sopra i 1024 px il pannello sta a fianco
+della mappa, sotto scivola sotto e i due si dividono l'altezza. Il posto giusto e'
+una fascia a tutta larghezza, alta 700 px.
+
+Due limiti noti, entrambi risolvibili leggendo dei parametri nell'indirizzo:
+filtri e strada cercata non finiscono nell'URL, quindi non si puo' aprire la mappa
+su una vista specifica; e il tema non segue la pagina ospite, perche' dentro
+l'iframe l'app guarda le preferenze del browser di chi legge.
+
 ## Provenienza dei dati
 
 I dati vengono da un export qgis2web di

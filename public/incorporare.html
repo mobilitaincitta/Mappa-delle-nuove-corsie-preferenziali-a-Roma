@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Incorporare la mappa — Nuove corsie preferenziali a Roma</title>
+<meta name="description" content="Come inserire la mappa delle nuove corsie preferenziali dentro una pagina del sito: esempio dal vivo, codice e spazio necessario.">
+<meta name="robots" content="noindex">
+<style>
+  :root {
+    color-scheme: light dark;
+    --sfondo: #fcfcfb;
+    --carta: #ffffff;
+    --inchiostro: #0b0b0b;
+    --inchiostro-2: #52514e;
+    --bordo: #e1e0d9;
+    --accento: #184f95;
+    --codice: #f5f4f0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --sfondo: #1a1a19;
+      --carta: #222220;
+      --inchiostro: #ffffff;
+      --inchiostro-2: #c3c2b7;
+      --bordo: #383835;
+      --accento: #9ec5f4;
+      --codice: #141413;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--sfondo);
+    color: var(--inchiostro);
+    font: 16px/1.65 system-ui, -apple-system, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .foglio { max-width: 1140px; margin: 0 auto; padding: 40px 24px 72px; }
+
+  header { border-bottom: 1px solid var(--bordo); padding-bottom: 20px; margin-bottom: 32px; }
+  h1 { font-size: 26px; line-height: 1.25; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .occhiello {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--inchiostro-2); margin: 0 0 10px;
+  }
+  h2 { font-size: 17px; margin: 40px 0 10px; letter-spacing: -0.005em; }
+  p { margin: 0 0 14px; color: var(--inchiostro-2); max-width: 68ch; }
+  p strong, li strong { color: var(--inchiostro); font-weight: 600; }
+  a { color: var(--accento); }
+
+  .cornice {
+    height: 700px; border: 1px solid var(--bordo); border-radius: 10px;
+    overflow: hidden; background: var(--carta); margin: 22px 0 8px;
+  }
+  .cornice iframe { width: 100%; height: 100%; border: 0; display: block; }
+  .didascalia { font-size: 12.5px; color: var(--inchiostro-2); margin: 0 0 8px; }
+
+  pre {
+    background: var(--codice); border: 1px solid var(--bordo); border-radius: 8px;
+    padding: 14px 16px; overflow-x: auto; margin: 0 0 14px;
+    font: 13px/1.6 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    color: var(--inchiostro);
+  }
+
+  table { border-collapse: collapse; width: 100%; max-width: 620px; margin: 6px 0 16px; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid var(--bordo); }
+  th { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--inchiostro-2); font-weight: 600; }
+  td:last-child, th:last-child { padding-right: 0; }
+  .si { color: var(--accento); font-weight: 600; }
+
+  ul { margin: 0 0 14px; padding-left: 20px; color: var(--inchiostro-2); max-width: 68ch; }
+  li { margin-bottom: 8px; }
+
+  footer {
+    margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--bordo);
+    font-size: 13px; color: var(--inchiostro-2);
+  }
+</style>
+</head>
+<body>
+<div class="foglio">
+
+  <header>
+    <p class="occhiello">Nuove corsie preferenziali a Roma</p>
+    <h1>Incorporare la mappa in una pagina del sito</h1>
+    <p style="margin:0">
+      La dashboard è una pagina statica e si può inserire in qualunque sito con un
+      <code>&lt;iframe&gt;</code>. Qui sotto è incorporata davvero: quella che segue non è
+      un'immagine, è la mappa che funziona dentro questa pagina.
+    </p>
+  </header>
+
+  <div class="cornice">
+    <iframe
+      src="https://mobilitaincitta.github.io/Mappa-delle-nuove-corsie-preferenziali-a-Roma/"
+      title="Nuove corsie preferenziali a Roma"
+      loading="lazy"></iframe>
+  </div>
+  <p class="didascalia">
+    Riquadro da 700 px di altezza.
+    <a href="https://mobilitaincitta.github.io/Mappa-delle-nuove-corsie-preferenziali-a-Roma/" target="_blank" rel="noreferrer">Apri la mappa a pagina intera →</a>
+  </p>
+
+  <h2>Il codice</h2>
+  <p>Da incollare dove deve comparire la mappa. Non serve altro: nessuno script, nessuna libreria.</p>
+<pre>&lt;div style="width:100%; height:700px; border:1px solid #ddd;
+            border-radius:8px; overflow:hidden"&gt;
+  &lt;iframe
+    src="https://mobilitaincitta.github.io/Mappa-delle-nuove-corsie-preferenziali-a-Roma/"
+    title="Nuove corsie preferenziali a Roma"
+    style="width:100%; height:100%; border:0; display:block"
+    loading="lazy"&gt;&lt;/iframe&gt;
+&lt;/div&gt;</pre>
+
+  <h2>Quanto spazio serve</h2>
+  <p>
+    La larghezza conta più dell'altezza. Sopra i <strong>1024 px</strong> il pannello dei
+    dati sta a fianco della mappa; sotto quella soglia scivola sotto, e mappa e pannello
+    si dividono l'altezza a metà.
+  </p>
+  <table>
+    <thead>
+      <tr><th>Riquadro</th><th>Mappa</th><th>Disposizione</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1100 × 700</td><td>720 × 643</td><td class="si">affiancati</td></tr>
+      <tr><td>900 × 700</td><td>900 × 315</td><td>impilati</td></tr>
+      <tr><td>527 × 600</td><td>527 × 270</td><td>impilati, intestazione su tre righe</td></tr>
+    </tbody>
+  </table>
+  <p>
+    In pratica: il posto giusto è una <strong>fascia a tutta larghezza</strong>, non una
+    colonna da articolo. Se la colonna stretta è obbligata, conviene salire a 800 px di
+    altezza e mettere accanto un link per aprire la mappa a pagina intera.
+  </p>
+
+  <h2>Due cose da sapere</h2>
+  <ul>
+    <li>
+      <strong>Non si può aprire su una vista specifica.</strong> Filtri, strada cercata e
+      tratto selezionato non finiscono nell'indirizzo, quindi non esiste un link che apra
+      la mappa già filtrata su una priorità o centrata su un quartiere. Si può aggiungere.
+    </li>
+    <li>
+      <strong>Il tema non segue la pagina che la ospita.</strong> Dentro il riquadro la
+      mappa sceglie chiaro o scuro in base alle preferenze del browser di chi guarda: su un
+      sito chiaro può comparire scura. Anche questo si può forzare.
+    </li>
+  </ul>
+
+  <footer>
+    Mappa della rete proposta — <strong>bozza</strong>, non un piano approvato.
+    Dati: elaborazione di <a href="https://github.com/mobilitaincitta" target="_blank" rel="noreferrer">Mobilità in Città</a>;
+    metropolitana © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a>;
+    tile © Esri.
+  </footer>
+
+</div>
+</body>
+</html>
