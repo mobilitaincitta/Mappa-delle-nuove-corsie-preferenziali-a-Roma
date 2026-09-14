@@ -43,9 +43,9 @@ manda `X-Frame-Options` ne' CSP, e il foglio di stile mette `height: 100%` su
 `html, body, #root`, quindi l'app riempie il riquadro che le si da'.
 
 La pagina [`public/incorporare.html`](public/incorporare.html) e' l'esempio da
-mostrare a chi cura il sito: contiene la mappa incorporata dal vivo, il codice da
-incollare e le misure. Essendo in `public/` viene copiata tale e quale nella
-build, quindi e' pubblicata accanto alla mappa:
+mostrare a chi cura il sito: contiene la mappa incorporata dal vivo e il codice da
+incollare. Essendo in `public/` viene copiata tale e quale nella build, quindi e'
+pubblicata accanto alla mappa:
 
     https://mobilitaincitta.github.io/Mappa-delle-nuove-corsie-preferenziali-a-Roma/incorporare.html
 
