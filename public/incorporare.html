@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Incorporare la mappa — Nuove corsie preferenziali a Roma</title>
-<meta name="description" content="Come inserire la mappa delle nuove corsie preferenziali dentro una pagina del sito: esempio dal vivo e codice da incollare.">
+<meta name="description" content="La mappa delle nuove corsie preferenziali di Roma, incorporata dentro una pagina del sito.">
 <meta name="robots" content="noindex">
 <style>
   :root {
@@ -15,7 +15,6 @@
     --inchiostro-2: #52514e;
     --bordo: #e1e0d9;
     --accento: #184f95;
-    --codice: #f5f4f0;
   }
   @media (prefers-color-scheme: dark) {
     :root {
@@ -25,7 +24,6 @@
       --inchiostro-2: #c3c2b7;
       --bordo: #383835;
       --accento: #9ec5f4;
-      --codice: #141413;
     }
   }
 
@@ -45,7 +43,6 @@
     font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
     text-transform: uppercase; color: var(--inchiostro-2); margin: 0 0 10px;
   }
-  h2 { font-size: 17px; margin: 40px 0 10px; letter-spacing: -0.005em; }
   p { margin: 0 0 14px; color: var(--inchiostro-2); max-width: 68ch; }
   p strong { color: var(--inchiostro); font-weight: 600; }
   a { color: var(--accento); }
@@ -56,13 +53,6 @@
   }
   .cornice iframe { width: 100%; height: 100%; border: 0; display: block; }
   .didascalia { font-size: 12.5px; color: var(--inchiostro-2); margin: 0 0 8px; }
-
-  pre {
-    background: var(--codice); border: 1px solid var(--bordo); border-radius: 8px;
-    padding: 14px 16px; overflow-x: auto; margin: 0 0 14px;
-    font: 13px/1.6 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-    color: var(--inchiostro);
-  }
 
   footer {
     margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--bordo);
@@ -93,17 +83,6 @@
     Riquadro da 700 px di altezza.
     <a href="https://mobilitaincitta.github.io/Mappa-delle-nuove-corsie-preferenziali-a-Roma/" target="_blank" rel="noreferrer">Apri la mappa a pagina intera →</a>
   </p>
-
-  <h2>Il codice</h2>
-  <p>Da incollare dove deve comparire la mappa. Non serve altro: nessuno script, nessuna libreria.</p>
-<pre>&lt;div style="width:100%; height:700px; border:1px solid #ddd;
-            border-radius:8px; overflow:hidden"&gt;
-  &lt;iframe
-    src="https://mobilitaincitta.github.io/Mappa-delle-nuove-corsie-preferenziali-a-Roma/"
-    title="Nuove corsie preferenziali a Roma"
-    style="width:100%; height:100%; border:0; display:block"
-    loading="lazy"&gt;&lt;/iframe&gt;
-&lt;/div&gt;</pre>
 
   <footer>
     Mappa della rete proposta — <strong>bozza</strong>, non un piano approvato.
