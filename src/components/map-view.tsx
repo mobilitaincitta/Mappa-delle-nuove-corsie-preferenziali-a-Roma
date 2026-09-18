@@ -23,19 +23,29 @@ export interface MapHandle {
 interface Props {
   dataset: Dataset
   filtri: Filtri
-  scuro: boolean
   selezionato: number | null
   onSelezione: (id: number | null) => void
   ref?: Ref<MapHandle>
 }
 
-/** Le tile sono le stesse dell'export originale, con la variante scura. */
+/** Le tile sono le stesse dell'export originale. */
 const BASEMAP = {
-  chiaro: 'Canvas/World_Light_Gray_Base',
-  chiaroEtichette: 'Canvas/World_Light_Gray_Reference',
-  scuro: 'Canvas/World_Dark_Gray_Base',
-  scuroEtichette: 'Canvas/World_Dark_Gray_Reference',
+  base: 'Canvas/World_Light_Gray_Base',
+  etichette: 'Canvas/World_Light_Gray_Reference',
 }
+
+/**
+ * Ultimo livello per cui Esri ha davvero le tile su Roma.
+ *
+ * Da 17 in su il servizio risponde 200 ma restituisce sempre la stessa immagine
+ * segnaposto da 2521 byte, quella che dice che il dato non e' disponibile.
+ * Dichiarandolo sulla sorgente, MapLibre smette di chiedere quei livelli e
+ * riusa il 16 ingrandendolo: lo sfondo si ammorbidisce, ma non compare mai la
+ * scritta. Il tetto di zoom sta un livello piu' su, dove l'ingrandimento e' di
+ * appena 2x e le linee restano nitide perche' sono vettoriali.
+ */
+const ZOOM_MAX_TILE = 16
+const ZOOM_MAX = 17
 
 const tile = (servizio: string) =>
   `https://services.arcgisonline.com/ArcGIS/rest/services/${servizio}/MapServer/tile/{z}/{y}/{x}`
@@ -56,6 +66,7 @@ function leggiColori() {
     esistenti: v('--viz-existing'),
     evidenza: v('--viz-highlight'),
     superficie: v('--viz-surface'),
+    ink2: v('--viz-ink-2'),
   }
 }
 
@@ -78,7 +89,6 @@ function webgl2Disponibile(): boolean {
 export function MapView({
   dataset,
   filtri,
-  scuro,
   selezionato,
   onSelezione,
   ref,
@@ -144,31 +154,24 @@ export function MapView({
         : {}),
       bounds,
       fitBoundsOptions: { padding: 48 },
+      maxZoom: ZOOM_MAX,
       style: {
         version: 8,
         sources: {
-          basemapChiaro: {
+          basemap: {
             type: 'raster',
-            tiles: [tile(BASEMAP.chiaro)],
+            tiles: [tile(BASEMAP.base)],
             tileSize: 256,
+            maxzoom: ZOOM_MAX_TILE,
             attribution: ATTRIBUZIONE,
           },
-          basemapChiaroEtichette: {
+          basemapEtichette: {
             type: 'raster',
-            tiles: [tile(BASEMAP.chiaroEtichette)],
+            tiles: [tile(BASEMAP.etichette)],
             tileSize: 256,
+            maxzoom: ZOOM_MAX_TILE,
           },
-          basemapScuro: {
-            type: 'raster',
-            tiles: [tile(BASEMAP.scuro)],
-            tileSize: 256,
-            attribution: ATTRIBUZIONE,
-          },
-          basemapScuroEtichette: {
-            type: 'raster',
-            tiles: [tile(BASEMAP.scuroEtichette)],
-            tileSize: 256,
-          },
+          confine: { type: 'geojson', data: dataset.confine as never },
           metroLinee: { type: 'geojson', data: dataset.metro.linee as never },
           metroStazioni: { type: 'geojson', data: dataset.metro.stazioni as never },
           esistenti: { type: 'geojson', data: dataset.esistenti as never },
@@ -176,34 +179,21 @@ export function MapView({
           evidenza: { type: 'geojson', data: VUOTO },
         },
         layers: [
-          // Le due basi restano entrambe caricate e si alternano per visibilità:
-          // cambiare setStyle a ogni cambio tema costringerebbe a ricreare
-          // sorgenti e layer. La visibilità iniziale è dichiarata qui e non
-          // aggiustata dopo `load`, altrimenti fino a quel momento sarebbero
-          // visibili tutte e quattro, con la scura sopra la chiara.
+          { id: 'base', type: 'raster', source: 'basemap' },
+          { id: 'base-etichette', type: 'raster', source: 'basemapEtichette' },
+
+          // Confine comunale: e' il limite di cio' di cui la mappa parla, quindi
+          // sta appena sopra lo sfondo e resta un tratteggio sottile.
           {
-            id: 'base-chiaro',
-            type: 'raster',
-            source: 'basemapChiaro',
-            layout: { visibility: scuro ? 'none' : 'visible' },
-          },
-          {
-            id: 'base-chiaro-etichette',
-            type: 'raster',
-            source: 'basemapChiaroEtichette',
-            layout: { visibility: scuro ? 'none' : 'visible' },
-          },
-          {
-            id: 'base-scuro',
-            type: 'raster',
-            source: 'basemapScuro',
-            layout: { visibility: scuro ? 'visible' : 'none' },
-          },
-          {
-            id: 'base-scuro-etichette',
-            type: 'raster',
-            source: 'basemapScuroEtichette',
-            layout: { visibility: scuro ? 'visible' : 'none' },
+            id: 'confine',
+            type: 'line',
+            source: 'confine',
+            paint: {
+              'line-color': colori.ink2,
+              'line-width': ['interpolate', ['linear'], ['zoom'], 9, 0.8, 14, 1.6],
+              'line-dasharray': [4, 3],
+              'line-opacity': 0.5,
+            },
           },
 
           // Metropolitana: contesto, quindi sta sotto tutto il resto della rete.
@@ -398,8 +388,8 @@ export function MapView({
       pronta.current = true
       etichetteMetro.current = creaEtichette(map, dataset)
       aggiornaEtichette(map, etichetteMetro.current, filtri.mostraMetro)
-      aggiornaTema(map, scuro)
       aggiornaFiltri(map, filtri)
+      confina(map, dataset)
       // Il fit passato al costruttore usa la dimensione che il contenitore ha in
       // quel momento, prima che il layout si sia stabilizzato: il risultato è
       // una vista troppo larga, con la rete ridotta a un groviglio al centro e
@@ -431,6 +421,9 @@ export function MapView({
      */
     const osservatore = new ResizeObserver(() => {
       map.resize()
+      // Lo zoom minimo dipende dall'altezza del riquadro: se cambia, il comune
+      // non riempirebbe piu' la vista con lo stesso valore.
+      if (pronta.current) confina(map, dataset)
       // A canvas più alto lo stesso zoom mostra più territorio: finché
       // l'inquadratura è quella automatica va ricalcolata, altrimenti la rete
       // resta un groviglio al centro con mezzo Lazio intorno.
@@ -473,11 +466,6 @@ export function MapView({
     // Il dataset non cambia per la vita del componente: la mappa si crea una volta.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataset])
-
-  // --- tema --------------------------------------------------------------
-  useEffect(() => {
-    quandoPronta((map) => aggiornaTema(map, scuro))
-  }, [scuro, quandoPronta])
 
   // --- filtri ------------------------------------------------------------
   useEffect(() => {
@@ -602,47 +590,32 @@ function aggiornaEtichette(
 
 // --- aggiornamenti imperativi ---------------------------------------------
 
-function aggiornaTema(map: MapLibreMap, scuro: boolean) {
-  const colori = leggiColori()
+/**
+ * Confina la vista al comune di Roma.
+ *
+ * Il tetto inferiore non e' un numero fisso: e' lo zoom al quale il comune
+ * riempie il riquadro, calcolato sulle dimensioni vere del contenitore. Un
+ * valore fisso andrebbe bene su un monitor e sbagliato dentro un iframe basso.
+ * Il riquadro di pan e' il confine con un margine, senza il quale a zoom minimo
+ * la vista — piu' larga del comune per via delle proporzioni — non riuscirebbe
+ * a stare dentro i limiti e scatterebbe.
+ */
+function confina(map: MapLibreMap, dataset: Dataset) {
+  const [ovest, sud, est, nord] = dataset.confine.bbox
+  const comune: [[number, number], [number, number]] = [
+    [ovest, sud],
+    [est, nord],
+  ]
 
-  const visibilita = (id: string, visibile: boolean) => {
-    if (map.getLayer(id)) {
-      map.setLayoutProperty(id, 'visibility', visibile ? 'visible' : 'none')
-    }
-  }
-  visibilita('base-chiaro', !scuro)
-  visibilita('base-chiaro-etichette', !scuro)
-  visibilita('base-scuro', scuro)
-  visibilita('base-scuro-etichette', scuro)
+  map.setMinZoom(0)
+  const camera = map.cameraForBounds(comune, { padding: 8 })
+  if (camera?.zoom != null) map.setMinZoom(Math.min(camera.zoom, ZOOM_MAX))
 
-  if (map.getLayer('proposte')) {
-    map.setPaintProperty('proposte', 'line-color', [
-      'match',
-      ['get', 'scenario'],
-      1, colori.sc1,
-      2, colori.sc2,
-      3, colori.sc3,
-      colori.sc2,
-    ])
-  }
-  if (map.getLayer('proposte-alone')) {
-    map.setPaintProperty('proposte-alone', 'line-color', colori.superficie)
-  }
-  for (const id of ['esistenti-promiscuo', 'esistenti-tram']) {
-    if (map.getLayer(id)) map.setPaintProperty(id, 'line-color', colori.esistenti)
-  }
-  if (map.getLayer('evidenza')) {
-    map.setPaintProperty('evidenza', 'line-color', colori.evidenza)
-  }
-  // I colori di linea restano quelli della segnaletica; a cambiare col tema
-  // sono solo l'alone e il riempimento dei pallini, che devono staccare dalla
-  // basemap chiara come da quella scura.
-  if (map.getLayer('metro-alone')) {
-    map.setPaintProperty('metro-alone', 'line-color', colori.superficie)
-  }
-  if (map.getLayer('metro-stazione')) {
-    map.setPaintProperty('metro-stazione', 'circle-color', colori.superficie)
-  }
+  const margine = 0.08
+  map.setMaxBounds([
+    [ovest - margine, sud - margine],
+    [est + margine, nord + margine],
+  ])
 }
 
 function aggiornaFiltri(map: MapLibreMap, filtri: Filtri) {

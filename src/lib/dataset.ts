@@ -9,14 +9,15 @@ export async function caricaDataset(): Promise<Dataset> {
   const base = import.meta.env.BASE_URL
   const url = (nome: string) => `${base}data/${nome}`
 
-  const [proposte, esistenti, meta, metro] = await Promise.all([
+  const [proposte, esistenti, meta, metro, confine] = await Promise.all([
     prendi(url('proposte.json')),
     prendi(url('esistenti.json')),
     prendi(url('meta.json')),
     prendi(url('metro.json')),
+    prendi(url('confine.json')),
   ])
 
-  return { proposte, esistenti, meta, metro } as Dataset
+  return { proposte, esistenti, meta, metro, confine } as Dataset
 }
 
 async function prendi(url: string) {

@@ -8,7 +8,6 @@ import { ScenarioControl } from '@/components/scenario-control'
 import { SegmentDetail } from '@/components/segment-detail'
 import { SegmentTable } from '@/components/segment-table'
 import { Legend } from '@/components/legend'
-import { ThemeToggle } from '@/components/theme-toggle'
 
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
@@ -19,14 +18,12 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 
 import { caricaDataset } from '@/lib/dataset'
 import { costruisciIndice, bboxDiFeature } from '@/lib/streets'
-import { useTheme } from '@/lib/use-theme'
 import { formattaNumero } from '@/lib/format'
 import type { Dataset, Filtri, Scenario } from '@/lib/types'
 
 const TUTTI_SCENARI: Scenario[] = [1, 2, 3]
 
 export default function App() {
-  const { scuro, alterna } = useTheme()
   const [dataset, setDataset] = useState<Dataset | null>(null)
   const [errore, setErrore] = useState<string | null>(null)
   const [selezionato, setSelezionato] = useState<number | null>(null)
@@ -140,7 +137,6 @@ export default function App() {
               }}
             />
           )}
-          <ThemeToggle scuro={scuro} onAlterna={alterna} />
         </header>
 
         <div className="grid min-h-0 flex-1 lg:grid-cols-[minmax(320px,380px)_1fr]">
@@ -222,7 +218,6 @@ export default function App() {
                   ref={mappa}
                   dataset={dataset}
                   filtri={filtri}
-                  scuro={scuro}
                   selezionato={selezionato}
                   onSelezione={setSelezionato}
                 />
@@ -236,8 +231,6 @@ export default function App() {
                     onToggleMetro={() =>
                       setFiltri((f) => ({ ...f, mostraMetro: !f.mostraMetro }))
                     }
-                    scuro={scuro}
-                    onAlternaTema={alterna}
                   />
                 </div>
               </>

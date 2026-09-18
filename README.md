@@ -55,8 +55,24 @@ una fascia a tutta larghezza, alta 700 px.
 
 Due limiti noti, entrambi risolvibili leggendo dei parametri nell'indirizzo:
 filtri e strada cercata non finiscono nell'URL, quindi non si puo' aprire la mappa
-su una vista specifica; e il tema non segue la pagina ospite, perche' dentro
-l'iframe l'app guarda le preferenze del browser di chi legge.
+su una vista specifica.
+
+## Limiti della vista
+
+La vista e' confinata al comune di Roma, il cui confine viene da OpenStreetMap
+(`npm run confine`, [`scripts/build-confine.mjs`](scripts/build-confine.mjs)) ed
+e' disegnato in mappa come tratteggio.
+
+Lo zoom minimo non e' un numero fisso ma quello al quale il comune riempie il
+riquadro, ricalcolato sulle dimensioni vere del contenitore: un valore fisso
+sarebbe giusto su un monitor e sbagliato dentro un iframe basso.
+
+Lo zoom massimo e' **17**. Le tile Esri su Roma esistono fino al livello **16**:
+dal 17 in su il servizio risponde 200 ma restituisce sempre la stessa immagine
+segnaposto da 2521 byte, quella con la scritta che il dato non e' disponibile.
+Le sorgenti dichiarano quindi `maxzoom: 16`, cosi' MapLibre non chiede mai quei
+livelli e riusa il 16 ingrandendolo: lo sfondo si ammorbidisce di un fattore 2,
+la rete resta nitida perche' e' vettoriale, e la scritta non compare mai.
 
 ## Provenienza dei dati
 
@@ -145,7 +161,7 @@ calcola lunghezze e aggregati e scrive in `public/data/`.
 ## Stack
 
 Vite · React 19 · TypeScript · Tailwind 4 · shadcn/ui · MapLibre GL · Photon ·
-tile di base Esri Canvas (le stesse dell'export originale, con la variante scura).
+tile di base Esri Canvas (le stesse dell'export originale).
 
 ## Pubblicazione
 

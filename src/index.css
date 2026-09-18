@@ -1,7 +1,6 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
-@custom-variant dark (&:is(.dark *));
 
 /* ---------------------------------------------------------------------------
    Token shadcn/ui (neutral)
@@ -29,27 +28,6 @@
   --ring: oklch(0.708 0 0);
 }
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.269 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.371 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(1 0 0 / 12%);
-  --input: oklch(1 0 0 / 18%);
-  --ring: oklch(0.556 0 0);
-}
 
 /* ---------------------------------------------------------------------------
    Token di visualizzazione.
@@ -57,7 +35,7 @@
    `scenario` è una priorità di attuazione (1 = primo lotto), quindi è una scala
    ORDINALE: una sola tonalità, tre gradini di luminosità monotoni, non tre
    colori diversi. Lo scenario 1 è il gradino con più contrasto sulla superficie
-   in entrambe le modalità, così la priorità più alta è anche la più leggibile.
+   così la priorità più alta è anche la più leggibile.
    Rampa verificata con lo script validate_palette.js (--ordinal): luminosità
    monotona, gap >= 0.06, estremo chiaro sopra 2:1 sulla superficie.
 
@@ -79,27 +57,12 @@
   --viz-highlight: #eda100;
 }
 
-.dark {
-  --viz-surface: #1a1a19;
-  --viz-ink: #ffffff;
-  --viz-ink-2: #c3c2b7;
-  --viz-muted: #898781;
-  --viz-grid: #2c2c2a;
-  --viz-baseline: #383835;
-
-  --viz-sc1: #9ec5f4;
-  --viz-sc2: #3987e5;
-  --viz-sc3: #184f95;
-  --viz-existing: #898781;
-  --viz-highlight: #eda100;
-}
 
 /*
  * Metropolitana.
  *
- * I colori sono quelli della segnaletica ATAC, presi dai tag `colour` di OSM e
- * identici nei due temi: sono un'identita' di linea, non una scelta grafica,
- * e cambiarli al buio li renderebbe irriconoscibili.
+ * I colori sono quelli della segnaletica ATAC, presi dai tag `colour` di OSM:
+ * sono un'identita' di linea, non una scelta grafica.
  *
  * Il font istituzionale di Roma Capitale e' Urbs, disegnato da Inarea: e'
  * proprietario e non ridistribuibile, quindi qui non c'e'. Se lo si licenzia,
@@ -178,8 +141,8 @@
   pointer-events: none;
   transform: translate(10px, -50%);
   /* Contorno nel colore della superficie: il nome resta leggibile sopra le
-     tile chiare e scure senza bisogno di un riquadro pieno, che coprirebbe
-     la rete sottostante. */
+     tile senza bisogno di un riquadro pieno, che coprirebbe la rete
+     sottostante. */
   text-shadow:
     -2px 0 var(--viz-surface), 2px 0 var(--viz-surface), 0 -2px var(--viz-surface),
     0 2px var(--viz-surface), -1.5px -1.5px var(--viz-surface), 1.5px -1.5px var(--viz-surface),
@@ -238,10 +201,6 @@
 
   .maplibregl-ctrl-group button .maplibregl-ctrl-icon {
     filter: var(--maplibre-icon-filter, none);
-  }
-
-  .dark .maplibregl-ctrl-group button .maplibregl-ctrl-icon {
-    filter: invert(1);
   }
 
   .maplibregl-ctrl-attrib.maplibregl-compact {

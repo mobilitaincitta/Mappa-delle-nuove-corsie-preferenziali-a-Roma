@@ -8,19 +8,6 @@
       content="Proposta di rete di nuove corsie preferenziali a Roma: 159 km su tre scenari di priorità, a confronto con i 114 km esistenti."
     />
     <title>Nuove corsie preferenziali a Roma — proposta di rete</title>
-    <script>
-      // Applica il tema prima del primo paint, altrimenti la pagina lampeggia
-      // in chiaro prima che React monti.
-      try {
-        var salvato = localStorage.getItem('tema')
-        var scuro = salvato
-          ? salvato === 'dark'
-          : matchMedia('(prefers-color-scheme: dark)').matches
-        document.documentElement.classList.toggle('dark', scuro)
-      } catch (e) {
-        /* localStorage non disponibile: resta il tema chiaro */
-      }
-    </script>
   </head>
   <body>
     <div id="root"></div>

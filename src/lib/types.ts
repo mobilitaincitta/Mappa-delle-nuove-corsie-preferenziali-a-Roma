@@ -77,11 +77,20 @@ export interface Metro {
   fonte: string
 }
 
+/** Confine comunale: linea da disegnare e riquadro entro cui tenere la vista. */
+export interface Confine {
+  type: 'FeatureCollection'
+  features: Feature<{ nome: string }>[]
+  bbox: Bbox
+  fonte: string
+}
+
 export interface Dataset {
   proposte: Collezione<PropProposta>
   esistenti: Collezione<PropEsistente>
   meta: Meta
   metro: Metro
+  confine: Confine
 }
 
 /** Stato dei filtri, condiviso da mappa, KPI e tabella. */
