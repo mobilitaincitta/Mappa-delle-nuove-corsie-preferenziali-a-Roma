@@ -216,8 +216,8 @@ export function MapView({
             source: 'metroLinee',
             paint: {
               'line-color': colori.superficie,
-              'line-width': ['interpolate', ['linear'], ['zoom'], 10, 3, 16, 8],
-              'line-opacity': 0.75,
+              'line-width': ['interpolate', ['linear'], ['zoom'], 10, 4, 16, 10],
+              'line-opacity': 0.45,
             },
             layout: {
               'line-cap': 'round',
@@ -231,8 +231,8 @@ export function MapView({
             source: 'metroLinee',
             paint: {
               'line-color': ['get', 'colore'],
-              'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1.4, 16, 4],
-              'line-opacity': 0.9,
+              'line-width': ['interpolate', ['linear'], ['zoom'], 10, 2.2, 16, 6],
+              'line-opacity': 0.55,
             },
             layout: {
               'line-cap': 'round',
