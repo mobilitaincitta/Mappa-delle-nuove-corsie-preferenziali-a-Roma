@@ -1,0 +1,54 @@
+{
+  "generatoDa": "scripts/build-data.mjs",
+  "fonte": "export qgis2web in legacy/ (mobilitaincitta@f2ccb21), km di sintesi dal piano",
+  "bbox": [
+    12.277051,
+    41.733883,
+    12.637265,
+    41.982578
+  ],
+  "proposte": {
+    "n": 275,
+    "len": 159000,
+    "perScenario": [
+      {
+        "key": 1,
+        "n": 132,
+        "len": 87000
+      },
+      {
+        "key": 2,
+        "n": 101,
+        "len": 53000
+      },
+      {
+        "key": 3,
+        "n": 42,
+        "len": 19000
+      }
+    ]
+  },
+  "esistenti": {
+    "n": 577,
+    "len": 114379,
+    "perUso": [
+      {
+        "key": "PROMISCUO",
+        "n": 414,
+        "len": 76525
+      },
+      {
+        "key": "TRAM",
+        "n": 163,
+        "len": 37854
+      }
+    ]
+  },
+  "qualita": {
+    "nomiDistinti": 339,
+    "nomiConPiuGrafie": 77,
+    "segmentiSotto5m": 4,
+    "maxTratti": 103,
+    "maxLen": 11628
+  }
+}
