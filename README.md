@@ -84,6 +84,28 @@ caricato all'avvio**: arriva alla prima accensione di uno dei due strati, una
 volta sola per sessione, con un avviso in legenda mentre scarica. Chi non apre
 l'analisi non lo scarica mai.
 
+### Gli stessi valori sui segmenti del piano
+
+Anche i 275 segmenti della rete proposta portano velocita' e benefit, mostrati
+nella loro scheda di dettaglio e nel popup della mappa.
+
+Le due fonti non hanno una chiave in comune — la rete proposta viene
+dall'export qgis2web, i segmenti osservati dal GeoPackage GTFS, e i nomi di
+strada sono scritti in modo diverso — quindi l'aggancio e' geometrico: ogni
+segmento osservato viene allargato di 10 m e si misura quanta parte della
+proposta ci cade dentro ([`scripts/abbina-analisi.py`](scripts/abbina-analisi.py)).
+
+Quella lunghezza e' anche il peso della media. Su una strada percorsa da piu'
+linee, o nei due sensi, lo stesso tratto compare in piu' segmenti osservati:
+pesarli per quanto coprono significa mediare sul traffico bus che quel tratto
+vede davvero, non sul numero di righe nel file. Via Cristoforo Colombo, per
+esempio, e' la media di 101 segmenti osservati.
+
+Tutte e 275 le proposte trovano un aggancio. Lo script va eseguito **dopo**
+`build-data.mjs` e `build-velocita.py`, perche' riscrive `proposte.json`:
+
+    npm run data && npm run velocita && npm run analisi
+
 ## Limiti della vista
 
 La vista e' confinata al comune di Roma, il cui confine viene da OpenStreetMap

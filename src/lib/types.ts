@@ -6,6 +6,15 @@ export interface PropProposta {
   scenario: Scenario
   len: number
   tratti: number
+  /**
+   * Velocità e benefit dei segmenti bus che passano su questo tratto, media
+   * pesata su quanto ciascuno lo copre. Assenti se nessun bus osservato ci
+   * transita.
+   */
+  vel?: number
+  ben?: number
+  /** Su quanti segmenti osservati è calcolata la media. */
+  nseg?: number
 }
 
 export interface PropEsistente {

@@ -3,6 +3,7 @@ import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { ModoAnalisi } from '@/lib/types'
+import { SCALE } from '@/lib/analisi'
 
 interface Props {
   mostraEsistenti: boolean
@@ -14,36 +15,7 @@ interface Props {
   caricandoAnalisi: boolean
 }
 
-/**
- * Le due scale, con le soglie chieste. L'etichetta dice il numero, non solo il
- * colore: chi non distingue rosso e verde deve poter leggere la classe lo
- * stesso.
- */
-const SCALE: Record<
-  Exclude<ModoAnalisi, 'nessuna'>,
-  { titolo: string; unita: string; classi: { testo: string; variabile: string }[] }
-> = {
-  velocita: {
-    titolo: 'Velocità media rilevata',
-    unita: 'km/h',
-    classi: [
-      { testo: '0 – 10', variabile: 'var(--an-vel-1)' },
-      { testo: '10 – 20', variabile: 'var(--an-vel-2)' },
-      { testo: '20 – 30', variabile: 'var(--an-vel-3)' },
-      { testo: 'oltre 30', variabile: 'var(--an-vel-4)' },
-    ],
-  },
-  benefit: {
-    titolo: 'Benefit score',
-    unita: 'scenario 2',
-    classi: [
-      { testo: '0 – 25', variabile: 'var(--an-ben-1)' },
-      { testo: '25 – 50', variabile: 'var(--an-ben-2)' },
-      { testo: '50 – 75', variabile: 'var(--an-ben-3)' },
-      { testo: '75 – 100', variabile: 'var(--an-ben-4)' },
-    ],
-  },
-}
+
 
 /** Le tre linee, con i colori della segnaletica presi dai token CSS. */
 const LINEE_METRO = [
@@ -175,13 +147,13 @@ export function Legend({
               <span className="ml-1 opacity-70">({scala.unita})</span>
             </div>
             <div className="mt-1.5 grid gap-1">
-              {scala.classi.map((c) => (
-                <div key={c.testo} className="flex items-center gap-2">
+              {scala.etichette.map((testo, i) => (
+                <div key={testo} className="flex items-center gap-2">
                   <span
                     className="h-0.5 w-5 shrink-0 rounded-full"
-                    style={{ backgroundColor: c.variabile }}
+                    style={{ backgroundColor: scala.tinte[i] }}
                   />
-                  <span className="text-xs">{c.testo}</span>
+                  <span className="text-xs">{testo}</span>
                 </div>
               ))}
             </div>

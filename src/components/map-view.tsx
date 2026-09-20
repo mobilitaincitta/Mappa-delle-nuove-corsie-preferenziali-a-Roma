@@ -12,6 +12,7 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 
 import type { Bbox, Dataset, Filtri, ModoAnalisi, PropProposta, Velocita } from '@/lib/types'
 import { formattaLunghezza } from '@/lib/format'
+import { SCALE, type Scala } from '@/lib/analisi'
 
 export interface MapHandle {
   inquadra: (bbox: Bbox, zoomMax?: number) => void
@@ -49,18 +50,14 @@ const BASEMAP = {
 const ZOOM_MAX_TILE = 16
 const ZOOM_MAX = 17
 
-/** Le soglie chieste: quattro classi per ciascuno strato. */
-export const CLASSI_VELOCITA = [10, 20, 30]
-export const CLASSI_BENEFIT = [25, 50, 75]
-
 /**
  * Colore a gradini: `step` assegna la prima tinta sotto la soglia più bassa e
  * poi una per ogni soglia superata. Classi nette, non una sfumatura continua:
  * la domanda è «in quale fascia cade questo segmento», non «quanto esattamente».
  */
-function coloreAGradini(campo: string, soglie: number[], tinte: string[]) {
-  const espressione: unknown[] = ['step', ['get', campo], tinte[0]]
-  soglie.forEach((soglia, i) => espressione.push(soglia, tinte[i + 1]))
+function coloreAGradini(scala: Scala, tinte: string[]) {
+  const espressione: unknown[] = ['step', ['get', scala.campo], tinte[0]]
+  scala.soglie.forEach((soglia, i) => espressione.push(soglia, tinte[i + 1]))
   return espressione
 }
 
@@ -383,6 +380,13 @@ export function MapView({
              <div class="mt-1 text-muted-foreground">
                Scenario ${p.scenario} · ${formattaLunghezza(Number(p.len))}
              </div>
+             ${
+               p.vel != null
+                 ? `<div class="mt-0.5 text-muted-foreground">
+                      ${Number(p.vel).toFixed(1).replace('.', ',')} km/h · benefit ${p.ben}/100
+                    </div>`
+                 : ''
+             }
            </div>`
         )
         .addTo(map)
@@ -612,7 +616,7 @@ function creaAnalisi(map: MapLibreMap, velocita: Velocita) {
       type: 'line',
       source: 'analisi',
       paint: {
-        'line-color': coloreAGradini('vel', CLASSI_VELOCITA, colori.vel) as never,
+        'line-color': coloreAGradini(SCALE.velocita, colori.vel) as never,
         'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1.2, 16, 4.5],
         'line-opacity': 0.85,
       },
@@ -627,15 +631,8 @@ function aggiornaAnalisi(map: MapLibreMap, modo: ModoAnalisi) {
   map.setLayoutProperty('analisi', 'visibility', modo === 'nessuna' ? 'none' : 'visible')
   if (modo === 'nessuna') return
   const colori = leggiColori()
-  const [campo, soglie, tinte] =
-    modo === 'velocita'
-      ? ['vel', CLASSI_VELOCITA, colori.vel]
-      : ['ben', CLASSI_BENEFIT, colori.ben]
-  map.setPaintProperty(
-    'analisi',
-    'line-color',
-    coloreAGradini(campo as string, soglie as number[], tinte as string[]) as never
-  )
+  const tinte = modo === 'velocita' ? colori.vel : colori.ben
+  map.setPaintProperty('analisi', 'line-color', coloreAGradini(SCALE[modo], tinte) as never)
 }
 
 // --- etichette delle stazioni ---------------------------------------------
