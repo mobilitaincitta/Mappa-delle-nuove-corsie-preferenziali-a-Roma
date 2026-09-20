@@ -85,6 +85,30 @@
     sans-serif;
 }
 
+/*
+ * Strati di analisi.
+ *
+ * Due scale a quattro classi, con significati opposti: la velocità è un
+ * problema quando è bassa, quindi va dal rosso al verde; il benefit score è
+ * un'opportunità quando è alto, quindi è una scala sequenziale che si scurisce
+ * salendo. Tenerle in due famiglie di colore diverse evita che, cambiando
+ * strato, la mappa sembri la stessa con altri numeri.
+ *
+ * Il viola non è usato da nient'altro in mappa: le corsie sono blu, la metro
+ * arancio/blu/verde, le esistenti grigie.
+ */
+:root {
+  --an-vel-1: #d73027;
+  --an-vel-2: #fdae61;
+  --an-vel-3: #a6d96a;
+  --an-vel-4: #1a9850;
+
+  --an-ben-1: #bcbddc;
+  --an-ben-2: #9e9ac8;
+  --an-ben-3: #756bb1;
+  --an-ben-4: #4a1486;
+}
+
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);

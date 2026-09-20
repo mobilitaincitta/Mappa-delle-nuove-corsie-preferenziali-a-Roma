@@ -77,6 +77,28 @@ export interface Metro {
   fonte: string
 }
 
+export interface PropVelocita {
+  id: number
+  nome: string | null
+  da: string | null
+  a: string | null
+  len: number
+  /** Linee che condividono il corridoio. */
+  linee: number
+  /** Velocità media rilevata fra le due fermate, km/h. */
+  vel: number
+  /** Benefit score dello scenario 2 «total», già su scala 0-100. */
+  ben: number
+}
+
+export type Velocita = Collezione<PropVelocita>
+
+/**
+ * Quale dei due strati di analisi è acceso. Si escludono: colorano gli stessi
+ * segmenti, e sovrapporli non vorrebbe dire niente.
+ */
+export type ModoAnalisi = 'nessuna' | 'velocita' | 'benefit'
+
 /** Confine comunale: linea da disegnare e riquadro entro cui tenere la vista. */
 export interface Confine {
   type: 'FeatureCollection'
@@ -98,6 +120,7 @@ export interface Filtri {
   scenari: Set<Scenario>
   mostraEsistenti: boolean
   mostraMetro: boolean
+  analisi: ModoAnalisi
 }
 
 export type Bbox = [number, number, number, number]

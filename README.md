@@ -57,6 +57,33 @@ Due limiti noti, entrambi risolvibili leggendo dei parametri nell'indirizzo:
 filtri e strada cercata non finiscono nell'URL, quindi non si puo' aprire la mappa
 su una vista specifica.
 
+## Analisi dei segmenti bus
+
+Due strati informativi sui 3992 segmenti di percorso osservati fra due fermate,
+da un GeoPackage QGIS esterno al repository, convertito con
+[`scripts/build-velocita.py`](scripts/build-velocita.py) (richiede geopandas):
+
+| Strato | Campo | Classi |
+|---|---|---|
+| Velocita media rilevata | `observed_avg_speed_kmh` | 0-10, 10-20, 20-30, oltre 30 km/h |
+| Benefit score | `scenario_2_benefit_score_total_100` | 0-25, 25-50, 50-75, 75-100 |
+
+**Si escludono a vicenda.** Colorano gli stessi segmenti, quindi in mappa non
+sono due layer ma uno solo, di cui cambia l'espressione di colore: non possono
+essere accesi insieme per costruzione. Stanno sotto la rete proposta — sono la
+diagnosi su cui si legge il piano, non il piano.
+
+Dei sei benefit score del file (tre scenari x running/total) arriva in mappa
+solo quello dello scenario 2 «total», lo stesso su cui e' costruita la selezione
+«final Top benefit score». **Lo scenario 2 di quel file e' uno scenario di
+intervento, non la seconda priorita' di attuazione della rete proposta**: stessa
+numerazione, cose diverse.
+
+Il GeoJSON pesa 1,4 MB contro i ~500 KB di tutto il resto, quindi **non viene
+caricato all'avvio**: arriva alla prima accensione di uno dei due strati, una
+volta sola per sessione, con un avviso in legenda mentre scarica. Chi non apre
+l'analisi non lo scarica mai.
+
 ## Limiti della vista
 
 La vista e' confinata al comune di Roma, il cui confine viene da OpenStreetMap

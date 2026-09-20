@@ -10,7 +10,7 @@ import maplibregl, { type LngLatBoundsLike, type Map as MapLibreMap } from 'mapl
 import { TriangleAlert } from 'lucide-react'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
-import type { Bbox, Dataset, Filtri, PropProposta } from '@/lib/types'
+import type { Bbox, Dataset, Filtri, ModoAnalisi, PropProposta, Velocita } from '@/lib/types'
 import { formattaLunghezza } from '@/lib/format'
 
 export interface MapHandle {
@@ -22,6 +22,8 @@ export interface MapHandle {
 
 interface Props {
   dataset: Dataset
+  /** Arriva più tardi del resto: è caricato solo se serve. */
+  velocita: Velocita | null
   filtri: Filtri
   selezionato: number | null
   onSelezione: (id: number | null) => void
@@ -47,6 +49,21 @@ const BASEMAP = {
 const ZOOM_MAX_TILE = 16
 const ZOOM_MAX = 17
 
+/** Le soglie chieste: quattro classi per ciascuno strato. */
+export const CLASSI_VELOCITA = [10, 20, 30]
+export const CLASSI_BENEFIT = [25, 50, 75]
+
+/**
+ * Colore a gradini: `step` assegna la prima tinta sotto la soglia più bassa e
+ * poi una per ogni soglia superata. Classi nette, non una sfumatura continua:
+ * la domanda è «in quale fascia cade questo segmento», non «quanto esattamente».
+ */
+function coloreAGradini(campo: string, soglie: number[], tinte: string[]) {
+  const espressione: unknown[] = ['step', ['get', campo], tinte[0]]
+  soglie.forEach((soglia, i) => espressione.push(soglia, tinte[i + 1]))
+  return espressione
+}
+
 const tile = (servizio: string) =>
   `https://services.arcgisonline.com/ArcGIS/rest/services/${servizio}/MapServer/tile/{z}/{y}/{x}`
 
@@ -67,6 +84,8 @@ function leggiColori() {
     evidenza: v('--viz-highlight'),
     superficie: v('--viz-surface'),
     ink2: v('--viz-ink-2'),
+    vel: [1, 2, 3, 4].map((i) => v(`--an-vel-${i}`)),
+    ben: [1, 2, 3, 4].map((i) => v(`--an-ben-${i}`)),
   }
 }
 
@@ -88,6 +107,7 @@ function webgl2Disponibile(): boolean {
 
 export function MapView({
   dataset,
+  velocita,
   filtri,
   selezionato,
   onSelezione,
@@ -467,6 +487,15 @@ export function MapView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataset])
 
+  // --- strati di analisi -------------------------------------------------
+  useEffect(() => {
+    if (!velocita) return
+    quandoPronta((map) => {
+      creaAnalisi(map, velocita)
+      aggiornaAnalisi(map, filtri.analisi)
+    })
+  }, [velocita, filtri.analisi, quandoPronta])
+
   // --- filtri ------------------------------------------------------------
   useEffect(() => {
     quandoPronta((map) => {
@@ -557,6 +586,55 @@ export function MapView({
         </div>
       )}
     </>
+  )
+}
+
+// --- strati di analisi ----------------------------------------------------
+
+/**
+ * Crea i due strati la prima volta che il dato arriva.
+ *
+ * Lo strato è uno solo: cambiare fra velocità e benefit vuol dire riscrivere il
+ * colore, non accendere un secondo layer. Così i due non possono essere accesi
+ * insieme per costruzione, che è quello che serve — colorano gli stessi
+ * segmenti e sovrapporli non direbbe niente.
+ *
+ * Va sotto `evidenza`, cioè sotto tutta la rete proposta: è la diagnosi su cui
+ * si legge il piano, non il piano.
+ */
+function creaAnalisi(map: MapLibreMap, velocita: Velocita) {
+  if (map.getSource('analisi')) return
+  const colori = leggiColori()
+  map.addSource('analisi', { type: 'geojson', data: velocita as never })
+  map.addLayer(
+    {
+      id: 'analisi',
+      type: 'line',
+      source: 'analisi',
+      paint: {
+        'line-color': coloreAGradini('vel', CLASSI_VELOCITA, colori.vel) as never,
+        'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1.2, 16, 4.5],
+        'line-opacity': 0.85,
+      },
+      layout: { 'line-cap': 'round', 'line-join': 'round', visibility: 'none' },
+    },
+    map.getLayer('evidenza') ? 'evidenza' : undefined
+  )
+}
+
+function aggiornaAnalisi(map: MapLibreMap, modo: ModoAnalisi) {
+  if (!map.getLayer('analisi')) return
+  map.setLayoutProperty('analisi', 'visibility', modo === 'nessuna' ? 'none' : 'visible')
+  if (modo === 'nessuna') return
+  const colori = leggiColori()
+  const [campo, soglie, tinte] =
+    modo === 'velocita'
+      ? ['vel', CLASSI_VELOCITA, colori.vel]
+      : ['ben', CLASSI_BENEFIT, colori.ben]
+  map.setPaintProperty(
+    'analisi',
+    'line-color',
+    coloreAGradini(campo as string, soglie as number[], tinte as string[]) as never
   )
 }
 

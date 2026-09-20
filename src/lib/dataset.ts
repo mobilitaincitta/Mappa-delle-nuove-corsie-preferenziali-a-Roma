@@ -1,4 +1,4 @@
-import type { Dataset } from './types'
+import type { Dataset, Velocita } from './types'
 
 /**
  * I GeoJSON stanno in public/data/ e vengono scaricati a runtime, non importati:
@@ -18,6 +18,14 @@ export async function caricaDataset(): Promise<Dataset> {
   ])
 
   return { proposte, esistenti, meta, metro, confine } as Dataset
+}
+
+/**
+ * I segmenti osservati pesano 1,4 MB: non entrano nel caricamento iniziale, che
+ * ne vale 500. Arrivano solo se qualcuno accende uno dei due strati di analisi.
+ */
+export async function caricaVelocita(): Promise<Velocita> {
+  return prendi(`${import.meta.env.BASE_URL}data/velocita.json`)
 }
 
 async function prendi(url: string) {

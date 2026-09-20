@@ -1,13 +1,48 @@
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, Loader2 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import type { ModoAnalisi } from '@/lib/types'
 
 interface Props {
   mostraEsistenti: boolean
   onToggleEsistenti: () => void
   mostraMetro: boolean
   onToggleMetro: () => void
+  analisi: ModoAnalisi
+  onCambiaAnalisi: (modo: ModoAnalisi) => void
+  caricandoAnalisi: boolean
+}
+
+/**
+ * Le due scale, con le soglie chieste. L'etichetta dice il numero, non solo il
+ * colore: chi non distingue rosso e verde deve poter leggere la classe lo
+ * stesso.
+ */
+const SCALE: Record<
+  Exclude<ModoAnalisi, 'nessuna'>,
+  { titolo: string; unita: string; classi: { testo: string; variabile: string }[] }
+> = {
+  velocita: {
+    titolo: 'Velocità media rilevata',
+    unita: 'km/h',
+    classi: [
+      { testo: '0 – 10', variabile: 'var(--an-vel-1)' },
+      { testo: '10 – 20', variabile: 'var(--an-vel-2)' },
+      { testo: '20 – 30', variabile: 'var(--an-vel-3)' },
+      { testo: 'oltre 30', variabile: 'var(--an-vel-4)' },
+    ],
+  },
+  benefit: {
+    titolo: 'Benefit score',
+    unita: 'scenario 2',
+    classi: [
+      { testo: '0 – 25', variabile: 'var(--an-ben-1)' },
+      { testo: '25 – 50', variabile: 'var(--an-ben-2)' },
+      { testo: '50 – 75', variabile: 'var(--an-ben-3)' },
+      { testo: '75 – 100', variabile: 'var(--an-ben-4)' },
+    ],
+  },
 }
 
 /** Le tre linee, con i colori della segnaletica presi dai token CSS. */
@@ -27,7 +62,11 @@ export function Legend({
   onToggleEsistenti,
   mostraMetro,
   onToggleMetro,
+  analisi,
+  onCambiaAnalisi,
+  caricandoAnalisi,
 }: Props) {
+  const scala = analisi === 'nessuna' ? null : SCALE[analisi]
   return (
     <div className="pointer-events-auto w-[246px] rounded-lg border bg-card/95 p-3 shadow-sm backdrop-blur-sm">
       <div className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
@@ -90,6 +129,66 @@ export function Legend({
         ))}
         <span className="ml-0.5 text-[10px] text-muted-foreground">linee e stazioni</span>
       </div>
+
+      {/* I due strati colorano gli stessi segmenti: si scelgono, non si
+          sommano, quindi un selettore a tre stati e non due interruttori. */}
+      <div className="mt-3 border-t pt-2.5">
+        <div className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+          Analisi dei segmenti bus
+        </div>
+        <div className="mt-2 grid grid-cols-3 gap-1 rounded-md bg-muted p-0.5">
+          {(
+            [
+              ['nessuna', 'Nessuna'],
+              ['velocita', 'Velocità'],
+              ['benefit', 'Benefit'],
+            ] as [ModoAnalisi, string][]
+          ).map(([modo, etichetta]) => (
+            <button
+              key={modo}
+              type="button"
+              onClick={() => onCambiaAnalisi(modo)}
+              aria-pressed={analisi === modo}
+              className={cn(
+                'rounded-[5px] px-1.5 py-1 text-[11px] transition-colors',
+                analisi === modo
+                  ? 'bg-card font-medium shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              {etichetta}
+            </button>
+          ))}
+        </div>
+
+        {caricandoAnalisi && (
+          <div className="mt-2 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+            <Loader2 className="size-3 animate-spin" />
+            Carico i segmenti…
+          </div>
+        )}
+
+        {scala && !caricandoAnalisi && (
+          <div className="mt-2">
+            <div className="text-[11px] text-muted-foreground">
+              {scala.titolo}
+              <span className="ml-1 opacity-70">({scala.unita})</span>
+            </div>
+            <div className="mt-1.5 grid gap-1">
+              {scala.classi.map((c) => (
+                <div key={c.testo} className="flex items-center gap-2">
+                  <span
+                    className="h-0.5 w-5 shrink-0 rounded-full"
+                    style={{ backgroundColor: c.variabile }}
+                  />
+                  <span className="text-xs">{c.testo}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
 
     </div>
   )

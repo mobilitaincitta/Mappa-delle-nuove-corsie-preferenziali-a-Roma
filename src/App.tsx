@@ -16,10 +16,10 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { TooltipProvider } from '@/components/ui/tooltip'
 
-import { caricaDataset } from '@/lib/dataset'
+import { caricaDataset, caricaVelocita } from '@/lib/dataset'
 import { costruisciIndice, bboxDiFeature } from '@/lib/streets'
 import { formattaNumero } from '@/lib/format'
-import type { Dataset, Filtri, Scenario } from '@/lib/types'
+import type { Dataset, Filtri, ModoAnalisi, Scenario, Velocita } from '@/lib/types'
 
 const TUTTI_SCENARI: Scenario[] = [1, 2, 3]
 
@@ -33,7 +33,23 @@ export default function App() {
     scenari: new Set(TUTTI_SCENARI),
     mostraEsistenti: true,
     mostraMetro: true,
+    analisi: 'nessuna',
   })
+
+  // I segmenti osservati pesano 1,4 MB: si scaricano alla prima accensione di
+  // uno dei due strati, una volta sola, e restano per il resto della sessione.
+  const [velocita, setVelocita] = useState<Velocita | null>(null)
+  const [caricandoAnalisi, setCaricandoAnalisi] = useState(false)
+
+  const cambiaAnalisi = (modo: ModoAnalisi) => {
+    setFiltri((f) => ({ ...f, analisi: modo }))
+    if (modo === 'nessuna' || velocita || caricandoAnalisi) return
+    setCaricandoAnalisi(true)
+    caricaVelocita()
+      .then(setVelocita)
+      .catch((e: Error) => setErrore(e.message))
+      .finally(() => setCaricandoAnalisi(false))
+  }
 
   useEffect(() => {
     caricaDataset()
@@ -217,6 +233,7 @@ export default function App() {
                 <MapView
                   ref={mappa}
                   dataset={dataset}
+                  velocita={velocita}
                   filtri={filtri}
                   selezionato={selezionato}
                   onSelezione={setSelezionato}
@@ -231,6 +248,9 @@ export default function App() {
                     onToggleMetro={() =>
                       setFiltri((f) => ({ ...f, mostraMetro: !f.mostraMetro }))
                     }
+                    analisi={filtri.analisi}
+                    onCambiaAnalisi={cambiaAnalisi}
+                    caricandoAnalisi={caricandoAnalisi}
                   />
                 </div>
               </>
