@@ -21,9 +21,16 @@ interface Props {
   indice: VoceStrada[]
   onSceltaLocale: (voce: VoceStrada) => void
   onSceltaRemota: (risultato: RisultatoPhoton) => void
+  /** Il campo vive nell'header colorato: chi lo ospita ne decide il contrasto. */
+  classeTrigger?: string
 }
 
-export function StreetSearch({ indice, onSceltaLocale, onSceltaRemota }: Props) {
+export function StreetSearch({
+  indice,
+  onSceltaLocale,
+  onSceltaRemota,
+  classeTrigger,
+}: Props) {
   const [aperta, setAperta] = useState(false)
   const [query, setQuery] = useState('')
   const [remoti, setRemoti] = useState<RisultatoPhoton[]>([])
@@ -115,7 +122,10 @@ export function StreetSearch({ indice, onSceltaLocale, onSceltaRemota }: Props) 
       <Button
         variant="outline"
         onClick={() => setAperta(true)}
-        className="h-9 w-full justify-start gap-2 px-3 text-muted-foreground sm:w-72"
+        className={cn(
+          'h-9 w-full justify-start gap-2 px-3 text-muted-foreground sm:w-72',
+          classeTrigger
+        )}
       >
         <Search className="size-4 shrink-0" />
         <span className="truncate text-sm font-normal">Cerca una strada…</span>

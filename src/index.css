@@ -36,8 +36,14 @@
    ORDINALE: una sola tonalità, tre gradini di luminosità monotoni, non tre
    colori diversi. Lo scenario 1 è il gradino con più contrasto sulla superficie
    così la priorità più alta è anche la più leggibile.
-   Rampa verificata con lo script validate_palette.js (--ordinal): luminosità
-   monotona, gap >= 0.06, estremo chiaro sopra 2:1 sulla superficie.
+
+   La tonalità è il magenta della campagna Clean Cities «Corsìa Preferenziale»,
+   con #ee2b75 esatto al gradino centrale. Rampa verificata con i criteri
+   dichiarati qui: luminanze 0,064 / 0,212 / 0,359 — monotone, gap 0,147 e 0,147
+   (serve >= 0,06) — e contrasto sulla superficie 8,94 / 3,91 / 2,50, con
+   l'estremo chiaro sopra il 2:1 richiesto. Il giallo di campagna fa l'evidenza:
+   è l'unica tinta calda che copre una linea intera invece di disegnarla, quindi
+   la selezione resta riconoscibile anche sopra l'arancio della metro A.
 
    Le corsie esistenti non fanno parte della scala: sono contesto, quindi grigio
    neutro, e TRAM vs PROMISCUO si distinguono per tratteggio, non per colore.
@@ -50,11 +56,25 @@
   --viz-grid: #e1e0d9;
   --viz-baseline: #c3c2b7;
 
-  --viz-sc1: #184f95;
-  --viz-sc2: #2a78d6;
-  --viz-sc3: #86b6ef;
+  --viz-sc1: #8e0c45;
+  --viz-sc2: #ee2b75;
+  --viz-sc3: #f27ba9;
   --viz-existing: #898781;
-  --viz-highlight: #eda100;
+  --viz-highlight: #ffd642;
+}
+
+/*
+ * Identità della campagna Clean Cities «Corsìa Preferenziale».
+ *
+ * Il magenta dell'header è appena più profondo di quello di campagna: sopra
+ * #ee2b75 il testo bianco piccolo sta a 4,01:1 e non passa, su #dd1a68 arriva a
+ * 4,75:1. Il magenta esatto resta dov'è più visibile, cioè nei dati.
+ */
+:root {
+  --brand: #ee2b75;
+  --brand-fondo: #dd1a68;
+  --brand-giallo: #ffd642;
+  --brand-inchiostro: #5a0327;
 }
 
 

@@ -144,14 +144,14 @@ export default function App() {
   return (
     <TooltipProvider delayDuration={200}>
       <div className="flex h-full flex-col">
-        <header className="z-20 flex shrink-0 flex-wrap items-center gap-2 border-b px-4 py-2.5">
+        <header className="z-20 flex shrink-0 flex-wrap items-center gap-2 bg-[var(--brand-fondo)] px-4 py-2.5 text-white">
           {/* Il pannello si chiude: incorporata in una colonna stretta, o su
               uno schermo piccolo, la mappa vale più dei numeri. */}
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setPannelloAperto((v) => !v)}
-            className="hidden size-8 shrink-0 text-muted-foreground lg:inline-flex"
+            className="hidden size-8 shrink-0 text-white/80 hover:bg-white/15 hover:text-white lg:inline-flex"
             aria-label={pannelloAperto ? 'Chiudi il pannello' : 'Apri il pannello'}
             aria-expanded={pannelloAperto}
           >
@@ -166,16 +166,20 @@ export default function App() {
               <h1 className="truncate text-sm font-semibold">
                 Nuove corsie preferenziali a Roma
               </h1>
-              <Badge variant="outline" className="shrink-0 text-[10px] font-normal">
+              <Badge
+                variant="outline"
+                className="shrink-0 border-transparent bg-[var(--brand-giallo)] text-[10px] font-medium text-[var(--brand-inchiostro)]"
+              >
                 bozza
               </Badge>
             </div>
-            <p className="truncate text-[11px] text-muted-foreground">
+            <p className="truncate text-[11px] text-white/85">
               Proposta di rete su tre scenari di priorità
             </p>
           </div>
           {dataset && (
             <StreetSearch
+              classeTrigger="border-transparent bg-white text-muted-foreground shadow-sm hover:bg-white"
               indice={indice}
               onSceltaLocale={(voce) => {
                 mappa.current?.evidenzia(voce.proposte, voce.esistenti)
@@ -297,6 +301,14 @@ export default function App() {
                 )}
               </>
             )}
+
+            {/* Fuori dall'area che scorre: gli autori restano visibili
+                qualunque analisi sia attiva e a qualunque punto della lista. */}
+            <footer className="shrink-0 border-t px-4 py-3 text-[11px] leading-relaxed text-muted-foreground">
+              <span className="font-medium text-foreground">A cura di</span> Caridad
+              Pineda, Matteo Collotti, Gaia Sgaramella, Giorgio Rubino, Giulia Galbiati,
+              Nicola Ippolito
+            </footer>
           </aside>
 
           <main className="relative order-1 min-h-[45vh] lg:order-2">

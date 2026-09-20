@@ -57,6 +57,30 @@ Due limiti noti, entrambi risolvibili leggendo dei parametri nell'indirizzo:
 filtri e strada cercata non finiscono nell'URL, quindi non si puo' aprire la mappa
 su una vista specifica.
 
+## Colori
+
+La palette viene dalla campagna Clean Cities «Corsìa Preferenziale»: magenta
+`#ee2b75` e giallo `#ffd642`.
+
+La scala delle priorita' e' una rampa ordinale di quel magenta —
+`#8e0c45` / `#ee2b75` / `#f27ba9` — con il colore di campagna esatto al gradino
+centrale. Verificata con i criteri dichiarati in `src/index.css`: luminanze
+0,064 / 0,212 / 0,359, monotone, gap 0,147 e 0,147 (serve >= 0,06), contrasto
+sulla superficie 8,94 / 3,91 / 2,50, con l'estremo chiaro sopra il 2:1 richiesto.
+
+Il giallo fa l'evidenza della selezione. L'header usa `#dd1a68`, un magenta
+appena piu' profondo: sopra `#ee2b75` il testo bianco piccolo sta a 4,01:1 e non
+passa, su `#dd1a68` arriva a 4,75:1. Il magenta esatto resta dove si vede di
+piu', cioe' nei dati.
+
+Le scale di velocita' e benefit restano fuori da questa identita': devono
+distinguersi fra loro e dal piano, non ripeterne il colore.
+
+## Autori
+
+Caridad Pineda, Matteo Collotti, Gaia Sgaramella, Giorgio Rubino, Giulia
+Galbiati, Nicola Ippolito.
+
 ## Le tre analisi
 
 In cima al pannello di sinistra si sceglie **una** delle tre, e tutto il
