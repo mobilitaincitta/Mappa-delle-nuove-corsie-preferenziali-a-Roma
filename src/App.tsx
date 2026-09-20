@@ -314,6 +314,7 @@ export default function App() {
                 />
                 <div className="pointer-events-none absolute top-3 left-3 z-10">
                   <Legend
+                    analisi={filtri.analisi}
                     mostraEsistenti={filtri.mostraEsistenti}
                     onToggleEsistenti={() =>
                       setFiltri((f) => ({ ...f, mostraEsistenti: !f.mostraEsistenti }))

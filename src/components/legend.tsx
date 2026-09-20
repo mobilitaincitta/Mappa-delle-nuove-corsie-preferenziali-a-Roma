@@ -2,8 +2,11 @@ import { Eye, EyeOff } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { SCALE } from '@/lib/analisi'
+import type { ModoAnalisi } from '@/lib/types'
 
 interface Props {
+  analisi: ModoAnalisi
   mostraEsistenti: boolean
   onToggleEsistenti: () => void
   mostraMetro: boolean
@@ -25,6 +28,7 @@ const LINEE_METRO = [
  * distinguono per tratteggio.
  */
 export function Legend({
+  analisi,
   mostraEsistenti,
   onToggleEsistenti,
   mostraMetro,
@@ -32,14 +36,37 @@ export function Legend({
 }: Props) {
   return (
     <div className="pointer-events-auto w-[246px] rounded-lg border bg-card/95 p-3 shadow-sm backdrop-blur-sm">
-      <div className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
-        Corsie preferenziali proposte
-      </div>
-      <div className="mt-2 grid gap-1.5">
-        <Voce classe="bg-sc1" testo="Scenario 1" nota="prima priorità" />
-        <Voce classe="bg-sc2" testo="Scenario 2" nota="seconda priorità" />
-        <Voce classe="bg-sc3" testo="Scenario 3" nota="terza priorità" />
-      </div>
+      {/* Con un'analisi accesa le corsie non sono in mappa: al loro posto va la
+          scala di ciò che è disegnato davvero. Serve soprattutto a pannello
+          chiuso, quando questa è l'unica legenda rimasta. */}
+      {analisi === 'scenario' ? (
+        <>
+          <div className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+            Corsie preferenziali proposte
+          </div>
+          <div className="mt-2 grid gap-1.5">
+            <Voce classe="bg-sc1" testo="Scenario 1" nota="prima priorità" />
+            <Voce classe="bg-sc2" testo="Scenario 2" nota="seconda priorità" />
+            <Voce classe="bg-sc3" testo="Scenario 3" nota="terza priorità" />
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+            {SCALE[analisi].titolo}
+          </div>
+          <div className="mt-2 grid gap-1.5">
+            {SCALE[analisi].etichette.map((testo, i) => (
+              <Voce
+                key={testo}
+                tinta={SCALE[analisi].tinte[i]}
+                testo={testo}
+                nota={i === 0 ? SCALE[analisi].unita : undefined}
+              />
+            ))}
+          </div>
+        </>
+      )}
 
       {/* Il titolo ora va a capo: lascialo crescere e tieni fermo il comando. */}
       <div className="mt-3 flex items-start justify-between gap-2 border-t pt-2.5">
@@ -99,11 +126,14 @@ export function Legend({
 
 function Voce({
   classe,
+  tinta,
   testo,
   nota,
   tratteggiata,
 }: {
-  classe: string
+  classe?: string
+  /** Colore diretto, per le scale che non hanno una classe Tailwind. */
+  tinta?: string
   testo: string
   nota?: string
   tratteggiata?: boolean
@@ -117,7 +147,10 @@ function Voce({
           ))}
         </span>
       ) : (
-        <span className={cn('h-0.5 w-5 shrink-0 rounded-full', classe)} />
+        <span
+          className={cn('h-0.5 w-5 shrink-0 rounded-full', classe)}
+          style={tinta ? { backgroundColor: tinta } : undefined}
+        />
       )}
       <span className="text-xs">{testo}</span>
       {nota && <span className="text-[10px] text-muted-foreground">{nota}</span>}

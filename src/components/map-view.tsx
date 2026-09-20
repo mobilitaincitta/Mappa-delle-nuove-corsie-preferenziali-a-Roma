@@ -779,6 +779,17 @@ function confina(map: MapLibreMap, dataset: Dataset) {
 }
 
 function aggiornaFiltri(map: MapLibreMap, filtri: Filtri) {
+  // Con un'analisi accesa le corsie del piano si spengono: sono disegnate sopra
+  // e più spesse, e coprirebbero proprio i segmenti che l'analisi colora. Sta
+  // qui e non in aggiornaAnalisi perché deve valere anche prima che i segmenti
+  // osservati abbiano finito di scaricarsi.
+  const scenarioAttivo = filtri.analisi === 'scenario'
+  for (const id of ['proposte', 'proposte-alone', 'proposte-click']) {
+    if (map.getLayer(id)) {
+      map.setLayoutProperty(id, 'visibility', scenarioAttivo ? 'visible' : 'none')
+    }
+  }
+
   const scenari = [...filtri.scenari]
   const filtro: unknown[] = ['in', ['get', 'scenario'], ['literal', scenari]]
 

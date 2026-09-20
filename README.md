@@ -84,8 +84,12 @@ convertito con [`scripts/build-velocita.py`](scripts/build-velocita.py)
 | Benefit score | `scenario_2_benefit_score_total_100` | 0-25, 25-50, 50-75, 75-100 |
 
 In mappa velocita' e benefit non sono due layer ma uno solo, di cui cambia
-l'espressione di colore: non possono essere accesi insieme per costruzione. Sta
-sotto la rete proposta — e' la diagnosi su cui si legge il piano, non il piano.
+l'espressione di colore: non possono essere accesi insieme per costruzione.
+
+Con un'analisi accesa **le corsie del piano si spengono**: sono disegnate sopra e
+piu' spesse, e coprirebbero proprio i segmenti che l'analisi colora. Al loro
+posto la legenda in mappa mostra la scala attiva, cosi' anche a pannello chiuso
+i colori hanno una chiave.
 
 Dei sei benefit score del file (tre scenari x running/total) arriva in mappa
 solo quello dello scenario 2 «total», lo stesso su cui e' costruita la selezione
