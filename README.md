@@ -96,6 +96,19 @@ Non si sommano: hanno soggetti diversi e in mappa si clicca l'uno o l'altro.
 Cambiando analisi la selezione si azzera, perche' non vorrebbe piu' dire niente,
 e tornano accese tutte le classi.
 
+In tutte e tre le analisi si possono scegliere **piu' segmenti insieme**: un clic
+in mappa o nella lista aggiunge o toglie, il vuoto azzera, e l'inquadratura segue
+l'insieme invece dell'ultimo clic — aggiungendo un tratto lontano la vista si
+allarga invece di saltare. Con piu' di uno il pannello mostra i km totali e, per
+velocita' e benefit, la media pesata sulla lunghezza: un tratto di 50 m e uno di
+900 non contano uguale.
+
+La scheda «Segmenti» c'e' in tutte e tre, con le colonne ordinabili nei due
+versi. Nelle analisi parte dall'ordine che risponde alla domanda dello strato —
+i piu' lenti in velocita', i punteggi piu' alti nel benefit — e disegna al
+massimo 300 righe: quasi 4000 nel DOM rendono lo scorrimento a scatti per una
+lista che serve a leggere gli estremi. I filtri di classe restringono anche qui.
+
 In tutte e tre le analisi le categorie si accendono e si spengono dalla stessa
 barra divisa: gli scenari in «scenario», le quattro classi in velocita' e
 benefit. Le righe sotto la barra fanno da legenda e da filtro insieme, e il
@@ -107,6 +120,11 @@ colonna stretta, la mappa vale piu' dei numeri.
 I segmenti osservati vengono da un GeoPackage QGIS esterno al repository,
 convertito con [`scripts/build-velocita.py`](scripts/build-velocita.py)
 (richiede geopandas):
+
+Undici segmenti riportavano 0,0 km/h esatti e non arrivano in mappa: non e' una
+velocita' ma un dato mancante travestito da zero — nove di quegli undici avevano
+anche benefit 0, e in testa a ogni classifica dei piu' lenti sarebbero finiti
+tratti che nessuno ha misurato. Restano 3981 segmenti.
 
 | Strato | Campo | Classi |
 |---|---|---|

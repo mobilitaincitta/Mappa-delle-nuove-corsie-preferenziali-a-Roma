@@ -18,7 +18,7 @@ type Colonna = 'nome' | 'scenario' | 'len'
 
 interface Props {
   segmenti: Feature<PropProposta>[]
-  selezionato: number | null
+  selezionati: Set<number>
   onSeleziona: (id: number) => void
 }
 
@@ -29,7 +29,7 @@ const CLASSE_SFONDO: Record<number, string> = { 1: 'bg-sc1', 2: 'bg-sc2', 3: 'bg
  * rampa, che sulla superficie chiara stanno sotto 3:1 di contrasto: qui ogni
  * segmento è leggibile per nome e numero, non per colore.
  */
-export function SegmentTable({ segmenti, selezionato, onSeleziona }: Props) {
+export function SegmentTable({ segmenti, selezionati, onSeleziona }: Props) {
   const [colonna, setColonna] = useState<Colonna>('len')
   const [discendente, setDiscendente] = useState(true)
 
@@ -105,7 +105,7 @@ export function SegmentTable({ segmenti, selezionato, onSeleziona }: Props) {
                 onClick={() => onSeleziona(p.id)}
                 className={cn(
                   'cursor-pointer',
-                  selezionato === p.id && 'bg-accent hover:bg-accent'
+                  selezionati.has(p.id) && 'bg-accent hover:bg-accent'
                 )}
               >
                 <TableCell className="max-w-0">

@@ -6,7 +6,9 @@ import { PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { MapView, type MapHandle } from '@/components/map-view'
 import { AnalisiControl } from '@/components/analisi-control'
 import { AnalisiPanel } from '@/components/analisi-panel'
-import { SCALE, TUTTE_LE_CLASSI } from '@/lib/analisi'
+import { SCALE, TUTTE_LE_CLASSI, classe } from '@/lib/analisi'
+import { BusTable } from '@/components/bus-table'
+import { SelezioneScenari } from '@/components/selezione-scenari'
 import { StreetSearch } from '@/components/street-search'
 import { StatTiles } from '@/components/stat-tiles'
 import { ScenarioControl } from '@/components/scenario-control'
@@ -33,8 +35,18 @@ const TUTTI_SCENARI: Scenario[] = [1, 2, 3]
 export default function App() {
   const [dataset, setDataset] = useState<Dataset | null>(null)
   const [errore, setErrore] = useState<string | null>(null)
-  const [selezionato, setSelezionato] = useState<number | null>(null)
-  const [selezionatoBus, setSelezionatoBus] = useState<number | null>(null)
+  // Selezione multipla: un clic aggiunge o toglie, il vuoto azzera. Un insieme
+  // e non un id solo, perché la domanda «quanto pesano questi tratti insieme»
+  // non si può fare su un segmento per volta.
+  const [selezionati, setSelezionati] = useState<Set<number>>(new Set())
+  const [selezionatiBus, setSelezionatiBus] = useState<Set<number>>(new Set())
+
+  const commuta = (insieme: Set<number>, id: number) => {
+    const nuovo = new Set(insieme)
+    if (nuovo.has(id)) nuovo.delete(id)
+    else nuovo.add(id)
+    return nuovo
+  }
   const [pannelloAperto, setPannelloAperto] = useState(true)
   const mappa = useRef<MapHandle>(null)
 
@@ -54,8 +66,8 @@ export default function App() {
   /** Cambiando analisi cambia il soggetto: la selezione precedente non vale più. */
   const cambiaAnalisi = (modo: ModoAnalisi) => {
     setFiltri((f) => ({ ...f, analisi: modo, classi: new Set(TUTTE_LE_CLASSI) }))
-    setSelezionato(null)
-    setSelezionatoBus(null)
+    setSelezionati(new Set())
+    setSelezionatiBus(new Set())
     mappa.current?.pulisciEvidenza()
     if (modo === 'scenario' || velocita || caricandoAnalisi) return
     setCaricandoAnalisi(true)
@@ -95,21 +107,37 @@ export default function App() {
       .reduce((acc, g) => acc + g.len, 0)
   }, [dataset, filtri])
 
-  const segmento = useMemo(
+  const segmenti = useMemo(
     () =>
-      dataset && selezionato != null
-        ? (dataset.proposte.features.find((f) => f.properties.id === selezionato) ?? null)
-        : null,
-    [dataset, selezionato]
+      dataset
+        ? dataset.proposte.features.filter((f) => selezionati.has(f.properties.id))
+        : [],
+    [dataset, selezionati]
   )
+  const segmento = segmenti.length === 1 ? segmenti[0] : null
 
-  const segmentoBus = useMemo(
-    () =>
-      velocita && selezionatoBus != null
-        ? (velocita.features.find((f) => f.properties.id === selezionatoBus) ?? null)
-        : null,
-    [velocita, selezionatoBus]
+  const busFiltrati = useMemo(() => {
+    if (!velocita || filtri.analisi === 'scenario') return []
+    const scala = SCALE[filtri.analisi]
+    return velocita.features.filter((f) =>
+      filtri.classi.has(classe(scala, f.properties[scala.campo]))
+    )
+  }, [velocita, filtri.analisi, filtri.classi])
+
+  const segmentiBus = useMemo(
+    () => (velocita ? velocita.features.filter((f) => selezionatiBus.has(f.properties.id)) : []),
+    [velocita, selezionatiBus]
   )
+  /**
+   * L'inquadratura segue la selezione: ogni volta che cambia, la vista si
+   * adatta all'insieme di ciò che è scelto, non all'ultimo clic. Così
+   * aggiungendo un tratto lontano si allarga invece di saltare.
+   */
+  useEffect(() => {
+    const scelti = filtri.analisi === 'scenario' ? segmenti : segmentiBus
+    if (!scelti.length) return
+    mappa.current?.inquadra(bboxDiFeature(scelti), 16)
+  }, [segmenti, segmentiBus, filtri.analisi])
 
   const omonimi = useMemo(() => {
     if (!dataset || !segmento) return []
@@ -193,11 +221,11 @@ export default function App() {
               onSceltaLocale={(voce) => {
                 mappa.current?.evidenzia(voce.proposte, voce.esistenti)
                 mappa.current?.inquadra(voce.bbox)
-                setSelezionato(voce.proposte.length === 1 ? voce.proposte[0] : null)
+                setSelezionati(new Set(voce.proposte))
               }}
               onSceltaRemota={(r) => {
                 mappa.current?.pulisciEvidenza()
-                setSelezionato(null)
+                setSelezionati(new Set())
                 if (r.bbox) mappa.current?.inquadra(r.bbox, 17)
                 else mappa.current?.volaSu(r.lon, r.lat)
               }}
@@ -235,20 +263,46 @@ export default function App() {
                 />
 
                 {filtri.analisi !== 'scenario' ? (
-                  <ScrollArea className="min-h-0 flex-1">
-                    <AnalisiPanel
-                      scala={SCALE[filtri.analisi]}
-                      velocita={velocita}
-                      classiAttive={filtri.classi}
-                      onToggleClasse={toggleClasse}
-                      segmento={segmentoBus}
-                      onChiudi={() => setSelezionatoBus(null)}
-                      onInquadra={() =>
-                        segmentoBus &&
-                        mappa.current?.inquadra(bboxDiFeature([segmentoBus]), 17)
-                      }
-                    />
-                  </ScrollArea>
+                  <Tabs
+                    defaultValue="panoramica"
+                    className="flex min-h-0 flex-1 flex-col gap-0"
+                  >
+                    <TabsList className="mx-4 mt-3 grid w-auto grid-cols-2">
+                      <TabsTrigger value="panoramica">Panoramica</TabsTrigger>
+                      <TabsTrigger value="segmenti">
+                        Segmenti
+                        <span className="tabular ml-1.5 text-[11px] text-muted-foreground">
+                          {formattaNumero(busFiltrati.length)}
+                        </span>
+                      </TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="panoramica" className="min-h-0 flex-1">
+                      <ScrollArea className="h-full">
+                        <AnalisiPanel
+                          scala={SCALE[filtri.analisi]}
+                          velocita={velocita}
+                          classiAttive={filtri.classi}
+                          onToggleClasse={toggleClasse}
+                          segmenti={segmentiBus}
+                          onChiudi={() => setSelezionatiBus(new Set())}
+                        />
+                      </ScrollArea>
+                    </TabsContent>
+
+                    <TabsContent value="segmenti" className="min-h-0 flex-1 p-4 pt-3">
+                      <div className="h-full min-h-0 overflow-hidden rounded-xl border bg-card">
+                        <BusTable
+                          segmenti={busFiltrati}
+                          scala={SCALE[filtri.analisi]}
+                          selezionati={selezionatiBus}
+                          onSeleziona={(id) =>
+                            setSelezionatiBus((s) => commuta(s, id))
+                          }
+                        />
+                      </div>
+                    </TabsContent>
+                  </Tabs>
                 ) : (
               <Tabs defaultValue="panoramica" className="flex min-h-0 flex-1 flex-col gap-0">
                 <TabsList className="mx-4 mt-3 grid w-auto grid-cols-2">
@@ -272,18 +326,28 @@ export default function App() {
                         nStrade={indice.length}
                       />
 
+                      {segmenti.length > 1 && (
+                        <SelezioneScenari
+                          segmenti={segmenti}
+                          onChiudi={() => {
+                            setSelezionati(new Set())
+                            mappa.current?.pulisciEvidenza()
+                          }}
+                        />
+                      )}
+
                       {segmento && (
                         <SegmentDetail
                           segmento={segmento}
                           omonimi={omonimi}
                           onChiudi={() => {
-                            setSelezionato(null)
+                            setSelezionati(new Set())
                             mappa.current?.pulisciEvidenza()
                           }}
                           onInquadra={() =>
                             mappa.current?.inquadra(bboxDiFeature([segmento]), 17)
                           }
-                          onVaiA={(id) => setSelezionato(id)}
+                          onVaiA={(id) => setSelezionati(new Set([id]))}
                         />
                       )}
 
@@ -297,16 +361,14 @@ export default function App() {
                   </ScrollArea>
                 </TabsContent>
 
-                <TabsContent value="segmenti" className="mt-3 min-h-0 flex-1">
+                <TabsContent value="segmenti" className="min-h-0 flex-1 p-4 pt-3">
+                  <div className="h-full min-h-0 overflow-hidden rounded-xl border bg-card">
                   <SegmentTable
                     segmenti={filtrati}
-                    selezionato={selezionato}
-                    onSeleziona={(id) => {
-                      setSelezionato(id)
-                      const f = dataset.proposte.features.find((x) => x.properties.id === id)
-                      if (f) mappa.current?.inquadra(bboxDiFeature([f]), 17)
-                    }}
+                    selezionati={selezionati}
+                    onSeleziona={(id) => setSelezionati((s) => commuta(s, id))}
                   />
+                  </div>
                 </TabsContent>
               </Tabs>
                 )}
@@ -330,10 +392,14 @@ export default function App() {
                   dataset={dataset}
                   velocita={velocita}
                   filtri={filtri}
-                  selezionato={selezionato}
-                  onSelezione={setSelezionato}
-                  selezionatoBus={selezionatoBus}
-                  onSelezioneBus={setSelezionatoBus}
+                  selezionati={selezionati}
+                  onSelezione={(id) =>
+                    setSelezionati((s) => (id == null ? new Set() : commuta(s, id)))
+                  }
+                  selezionatiBus={selezionatiBus}
+                  onSelezioneBus={(id) =>
+                    setSelezionatiBus((s) => (id == null ? new Set() : commuta(s, id)))
+                  }
                 />
                 <div className="pointer-events-none absolute top-3 left-3 z-10">
                   <Legend

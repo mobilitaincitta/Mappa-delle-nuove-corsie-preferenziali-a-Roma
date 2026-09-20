@@ -61,7 +61,15 @@ export function togliPrefisso(norm: string): string {
   return norm
 }
 
-const parti = (g: Geometria) => g.coordinates
+/**
+ * Le parti di una geometria, qualunque sia il tipo.
+ *
+ * Le corsie proposte sono MultiLineString, i segmenti bus osservati sono
+ * LineString: per le seconde `coordinates` è già l'elenco dei vertici, e
+ * trattarlo come una lista di linee farebbe iterare su un [lon, lat].
+ */
+const parti = (g: Geometria): number[][][] =>
+  g.type === 'LineString' ? [g.coordinates as unknown as number[][]] : g.coordinates
 
 function estendi(bbox: Bbox, g: Geometria): void {
   for (const linea of parti(g)) {

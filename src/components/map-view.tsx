@@ -34,9 +34,9 @@ interface Props {
   /** Arriva più tardi del resto: è caricato solo se serve. */
   velocita: Velocita | null
   filtri: Filtri
-  selezionato: number | null
+  selezionati: Set<number>
   onSelezione: (id: number | null) => void
-  selezionatoBus: number | null
+  selezionatiBus: Set<number>
   onSelezioneBus: (id: number | null) => void
   ref?: Ref<MapHandle>
 }
@@ -116,9 +116,9 @@ export function MapView({
   dataset,
   velocita,
   filtri,
-  selezionato,
+  selezionati,
   onSelezione,
-  selezionatoBus,
+  selezionatiBus,
   onSelezioneBus,
   ref,
 }: Props) {
@@ -550,14 +550,13 @@ export function MapView({
 
   // --- segmento bus selezionato ------------------------------------------
   useEffect(() => {
-    if (!velocita || selezionatoBus == null) return
-    const f = velocita.features.find((x) => x.properties.id === selezionatoBus)
-    if (!f) return
+    if (!velocita) return
+    const scelti = velocita.features.filter((x) => selezionatiBus.has(x.properties.id))
     quandoPronta((map) => {
       const sorgente = map.getSource('evidenza') as maplibregl.GeoJSONSource | undefined
-      sorgente?.setData({ type: 'FeatureCollection', features: [f] } as never)
+      sorgente?.setData({ type: 'FeatureCollection', features: scelti } as never)
     })
-  }, [selezionatoBus, velocita, quandoPronta])
+  }, [selezionatiBus, velocita, quandoPronta])
 
   // --- strati di analisi -------------------------------------------------
   useEffect(() => {
@@ -578,14 +577,12 @@ export function MapView({
 
   // --- segmento selezionato ---------------------------------------------
   useEffect(() => {
-    if (selezionato == null) return
-    const f = dataset.proposte.features.find((x) => x.properties.id === selezionato)
-    if (!f) return
+    const scelti = dataset.proposte.features.filter((x) => selezionati.has(x.properties.id))
     quandoPronta((map) => {
       const sorgente = map.getSource('evidenza') as maplibregl.GeoJSONSource | undefined
-      sorgente?.setData({ type: 'FeatureCollection', features: [f] } as never)
+      sorgente?.setData({ type: 'FeatureCollection', features: scelti } as never)
     })
-  }, [selezionato, dataset, quandoPronta])
+  }, [selezionati, dataset, quandoPronta])
 
   useImperativeHandle(
     ref,

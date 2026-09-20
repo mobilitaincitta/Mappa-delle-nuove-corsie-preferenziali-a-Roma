@@ -45,6 +45,15 @@ g = gpd.read_file(SORGENTE)
 if g.crs is None or g.crs.to_epsg() != 4326:
     g = g.to_crs(4326)
 
+# Undici segmenti riportano 0,0 km/h esatti. Non e' una velocita': e' un dato
+# mancante travestito da zero — nove di quegli undici hanno anche benefit 0.
+# Lasciarli dentro metterebbe in cima a ogni classifica dei piu' lenti dei
+# tratti che nessuno ha misurato.
+# La soglia e' 0,05 e non 0: in mappa la velocita' si scrive con un decimale,
+# quindi 0,04 km/h comparirebbe comunque come «0,0 km/h».
+scartati = int((g.observed_avg_speed_kmh < 0.05).sum())
+g = g[g.observed_avg_speed_kmh >= 0.05].reset_index(drop=True)
+
 vertici_prima = int(g.geometry.apply(lambda x: len(x.coords)).sum())
 g["geometry"] = g.geometry.simplify(TOLLERANZA, preserve_topology=False)
 vertici_dopo = int(g.geometry.apply(lambda x: len(x.coords)).sum())
@@ -97,6 +106,6 @@ USCITA.write_text(
 )
 
 peso = USCITA.stat().st_size / 1024
-print(f"segmenti: {len(features)}")
+print(f"segmenti: {len(features)}  (scartati {scartati} con velocita 0)")
 print(f"vertici:  {vertici_prima} -> {vertici_dopo} ({round((1 - vertici_dopo / vertici_prima) * 100)}% in meno)")
 print(f"scritto:  {USCITA.name}  {peso:.0f} KB")

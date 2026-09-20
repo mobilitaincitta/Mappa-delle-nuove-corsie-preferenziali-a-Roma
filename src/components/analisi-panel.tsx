@@ -1,4 +1,4 @@
-import { Crosshair, X } from 'lucide-react'
+import { X } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -13,9 +13,9 @@ interface Props {
   velocita: Velocita | null
   classiAttive: Set<number>
   onToggleClasse: (i: number) => void
-  segmento: Feature<PropVelocita> | null
+  /** Selezione corrente: uno, nessuno o molti. */
+  segmenti: Feature<PropVelocita>[]
   onChiudi: () => void
-  onInquadra: () => void
 }
 
 /**
@@ -30,9 +30,8 @@ export function AnalisiPanel({
   velocita,
   classiAttive,
   onToggleClasse,
-  segmento,
+  segmenti,
   onChiudi,
-  onInquadra,
 }: Props) {
   const features = velocita?.features ?? []
   const classi = scala.etichette.map((etichetta, i) => ({
@@ -127,19 +126,101 @@ export function AnalisiPanel({
         </div>
       </Card>
 
-      {segmento ? (
-        <DettaglioSegmento
-          scala={scala}
-          segmento={segmento}
-          onChiudi={onChiudi}
-          onInquadra={onInquadra}
-        />
+      {segmenti.length === 1 ? (
+        <DettaglioSegmento scala={scala} segmento={segmenti[0]} onChiudi={onChiudi} />
+      ) : segmenti.length > 1 ? (
+        <SelezioneMultipla scala={scala} segmenti={segmenti} onChiudi={onChiudi} />
       ) : (
         <p className="px-1 text-xs leading-relaxed text-muted-foreground">
-          Tocca un segmento in mappa per vederne il valore.
+          Tocca i segmenti in mappa o nella lista: si sommano, e l'inquadratura
+          li segue.
         </p>
       )}
     </div>
+  )
+}
+
+/**
+ * Con più segmenti scelti la domanda cambia: non «quanto vale questo» ma
+ * «quanto pesano insieme». La media è pesata sulla lunghezza, perché un tratto
+ * di 50 m e uno di 900 non contano uguale.
+ */
+function SelezioneMultipla({
+  scala,
+  segmenti,
+  onChiudi,
+}: {
+  scala: Scala
+  segmenti: Feature<PropVelocita>[]
+  onChiudi: () => void
+}) {
+  const metri = segmenti.reduce((a, f) => a + f.properties.len, 0)
+  const media = metri
+    ? segmenti.reduce((a, f) => a + f.properties[scala.campo] * f.properties.len, 0) / metri
+    : 0
+  const i = classe(scala, media)
+
+  return (
+    <Card className="gap-0 px-4 py-3.5">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <div className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+            Selezione
+          </div>
+          <h2 className="mt-0.5 text-sm leading-snug font-semibold">
+            {formattaNumero(segmenti.length)} segmenti &middot; {formattaKm(metri)}
+          </h2>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onChiudi}
+          className="-mt-1 -mr-1.5 size-7 shrink-0 text-muted-foreground"
+          aria-label="Azzera la selezione"
+        >
+          <X className="size-4" />
+        </Button>
+      </div>
+
+      <div className="mt-2.5 flex items-baseline gap-2">
+        <span
+          className="size-2.5 shrink-0 self-center rounded-full ring-1 ring-black/10"
+          style={{ backgroundColor: scala.tinte[i] }}
+          aria-hidden
+        />
+        <span className="text-2xl leading-none font-semibold tracking-tight">
+          {scala.campo === 'vel' ? media.toFixed(1).replace('.', ',') : Math.round(media)}
+        </span>
+        <span className="text-sm text-muted-foreground">
+          {scala.campo === 'vel' ? 'km/h' : 'su 100'}
+        </span>
+        <span className="ml-auto text-[11px] text-muted-foreground">media sui km</span>
+      </div>
+
+      <Separator className="my-3" />
+
+      <ul className="grid max-h-40 gap-1 overflow-auto text-[12px]">
+        {segmenti.map((f) => (
+          <li key={f.properties.id} className="flex items-center gap-2">
+            <span
+              className="size-1.5 shrink-0 rounded-full"
+              style={{
+                backgroundColor: scala.tinte[classe(scala, f.properties[scala.campo])],
+              }}
+              aria-hidden
+            />
+            <span className="min-w-0 flex-1 truncate">
+              {f.properties.nome ?? 'Strada non indicata'}
+            </span>
+            <span className="tabular shrink-0 text-muted-foreground">
+              {scala.campo === 'vel'
+                ? `${f.properties.vel.toFixed(1).replace('.', ',')} km/h`
+                : f.properties.ben}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </Card>
   )
 }
 
@@ -147,12 +228,10 @@ function DettaglioSegmento({
   scala,
   segmento,
   onChiudi,
-  onInquadra,
 }: {
   scala: Scala
   segmento: Feature<PropVelocita>
   onChiudi: () => void
-  onInquadra: () => void
 }) {
   const p = segmento.properties
   const valore = p[scala.campo]
@@ -219,10 +298,6 @@ function DettaglioSegmento({
         </Riga>
       </dl>
 
-      <Button variant="outline" size="sm" onClick={onInquadra} className="mt-3 h-8 gap-1.5">
-        <Crosshair className="size-3.5" />
-        Inquadra il segmento
-      </Button>
     </Card>
   )
 }
