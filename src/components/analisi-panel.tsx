@@ -5,7 +5,13 @@ import { Card } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { classe, type Scala } from '@/lib/analisi'
 import { cn } from '@/lib/utils'
-import { formattaKm, formattaLunghezza, formattaNumero, formattaPercento } from '@/lib/format'
+import {
+  formattaKm,
+  formattaLunghezza,
+  formattaNumero,
+  formattaPercento,
+  formattaVelocita,
+} from '@/lib/format'
 import type { Feature, PropVelocita, Velocita } from '@/lib/types'
 
 interface Props {
@@ -189,7 +195,7 @@ function SelezioneMultipla({
           aria-hidden
         />
         <span className="text-2xl leading-none font-semibold tracking-tight">
-          {scala.campo === 'vel' ? media.toFixed(1).replace('.', ',') : Math.round(media)}
+          {scala.campo === 'vel' ? formattaVelocita(media) : Math.round(media)}
         </span>
         <span className="text-sm text-muted-foreground">
           {scala.campo === 'vel' ? 'km/h' : 'su 100'}
@@ -214,7 +220,7 @@ function SelezioneMultipla({
             </span>
             <span className="tabular shrink-0 text-muted-foreground">
               {scala.campo === 'vel'
-                ? `${f.properties.vel.toFixed(1).replace('.', ',')} km/h`
+                ? `${formattaVelocita(f.properties.vel)} km/h`
                 : f.properties.ben}
             </span>
           </li>
@@ -268,7 +274,7 @@ function DettaglioSegmento({
           aria-hidden
         />
         <span className="text-2xl leading-none font-semibold tracking-tight">
-          {scala.campo === 'vel' ? valore.toFixed(1).replace('.', ',') : valore}
+          {scala.campo === 'vel' ? formattaVelocita(valore) : valore}
         </span>
         <span className="text-sm text-muted-foreground">
           {scala.campo === 'vel' ? 'km/h' : 'su 100'}
@@ -291,9 +297,7 @@ function DettaglioSegmento({
         </Riga>
         <Riga etichetta={scala.campo === 'vel' ? 'Benefit score' : 'Velocità rilevata'}>
           <span className="tabular text-muted-foreground">
-            {scala.campo === 'vel'
-              ? `${p.ben} su 100`
-              : `${p.vel.toFixed(1).replace('.', ',')} km/h`}
+            {scala.campo === 'vel' ? `${p.ben} su 100` : `${formattaVelocita(p.vel)} km/h`}
           </span>
         </Riga>
       </dl>

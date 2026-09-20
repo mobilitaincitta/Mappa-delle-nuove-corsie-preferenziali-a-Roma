@@ -1,4 +1,5 @@
-import { Eye, EyeOff } from 'lucide-react'
+import { useState } from 'react'
+import { ChevronDown, ChevronUp, Eye, EyeOff } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -27,6 +28,16 @@ const LINEE_METRO = [
  * ogni voce ha il campione accanto al testo, e le due corsie esistenti si
  * distinguono per tratteggio.
  */
+/**
+ * Sotto i 640 px la legenda parte chiusa.
+ *
+ * Su un telefono la mappa è alta 360 px e la legenda aperta ne copre 300: resta
+ * una striscia. Chiusa è una riga sola che dice cosa c'è dentro e si apre al
+ * tocco. Su schermi larghi resta aperta com'era: lì lo spazio c'è.
+ */
+const apertaDiDefault = () =>
+  typeof window === 'undefined' || window.matchMedia('(min-width: 640px)').matches
+
 export function Legend({
   analisi,
   mostraEsistenti,
@@ -34,8 +45,37 @@ export function Legend({
   mostraMetro,
   onToggleMetro,
 }: Props) {
+  const [aperta, setAperta] = useState(apertaDiDefault)
+
+  if (!aperta) {
+    return (
+      <button
+        type="button"
+        onClick={() => setAperta(true)}
+        aria-expanded={false}
+        className="pointer-events-auto flex items-center gap-1.5 rounded-lg border bg-card/95 px-3 py-2 text-[11px] font-medium tracking-wide text-muted-foreground uppercase shadow-sm backdrop-blur-sm"
+      >
+        Legenda
+        <ChevronDown className="size-3.5" />
+      </button>
+    )
+  }
+
   return (
     <div className="pointer-events-auto w-[246px] rounded-lg border bg-card/95 p-3 shadow-sm backdrop-blur-sm">
+      {/* Il comando per richiudere compare solo dove la legenda può partire
+          chiusa: sugli schermi larghi sarebbe un bottone per un problema che
+          non c'è. */}
+      <button
+        type="button"
+        onClick={() => setAperta(false)}
+        aria-expanded={true}
+        aria-label="Chiudi la legenda"
+        className="-mt-1 -mr-1 mb-1 ml-auto flex items-center gap-1 text-[11px] text-muted-foreground sm:hidden"
+      >
+        Chiudi
+        <ChevronUp className="size-3.5" />
+      </button>
       {/* Con un'analisi accesa le corsie non sono in mappa: al loro posto va la
           scala di ciò che è disegnato davvero. Serve soprattutto a pannello
           chiuso, quando questa è l'unica legenda rimasta. */}

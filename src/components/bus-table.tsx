@@ -11,7 +11,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { classe, type Scala } from '@/lib/analisi'
-import { formattaLunghezza, formattaNumero } from '@/lib/format'
+import { formattaLunghezza, formattaNumero, formattaVelocita } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import type { Feature, PropVelocita } from '@/lib/types'
 
@@ -35,33 +35,14 @@ interface Props {
  */
 const RIGHE_MASSIME = 300
 
-/**
- * Soglia dei «molto lenti», applicata alla sola lista.
- *
- * Sotto i 5 km/h stanno 500 segmenti e 201 km — un ottavo della rete — che
- * dentro la fascia 0-10 non si distinguono. Restano lì anche nella scala dei
- * colori, perché spezzare la classificazione cambierebbe la lettura della mappa
- * per tutti: qui è solo un modo di scorrere l'elenco.
- */
-const SOGLIA_LENTI = 5
-
 export function BusTable({ segmenti, scala, selezionati, onSeleziona }: Props) {
-  const [soloLenti, setSoloLenti] = useState(false)
   const [colonna, setColonna] = useState<Colonna>('valore')
   // L'ordine di partenza è quello che risponde alla domanda dello strato: nella
   // velocità interessano i più lenti, nel benefit i punteggi più alti.
   const [discendente, setDiscendente] = useState(scala.campo === 'ben')
 
-  const elencabili = useMemo(
-    () =>
-      scala.campo === 'vel' && soloLenti
-        ? segmenti.filter((f) => f.properties.vel < SOGLIA_LENTI)
-        : segmenti,
-    [segmenti, scala.campo, soloLenti]
-  )
-
   const ordinati = useMemo(() => {
-    const copia = [...elencabili]
+    const copia = [...segmenti]
     copia.sort((a, b) => {
       let d: number
       if (colonna === 'nome') {
@@ -74,7 +55,7 @@ export function BusTable({ segmenti, scala, selezionati, onSeleziona }: Props) {
       return discendente ? -d : d
     })
     return copia
-  }, [elencabili, colonna, discendente, scala.campo])
+  }, [segmenti, colonna, discendente, scala.campo])
 
   const ordina = (c: Colonna) => {
     if (c === colonna) setDiscendente((v) => !v)
@@ -89,27 +70,6 @@ export function BusTable({ segmenti, scala, selezionati, onSeleziona }: Props) {
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      {scala.campo === 'vel' && (
-        <div className="flex shrink-0 items-center gap-2 border-b px-3 py-2">
-          <button
-            type="button"
-            onClick={() => setSoloLenti((v) => !v)}
-            aria-pressed={soloLenti}
-            className={cn(
-              'rounded-md border px-2 py-1 text-[11px] transition-colors',
-              soloLenti
-                ? 'border-transparent bg-foreground text-background'
-                : 'text-muted-foreground hover:text-foreground'
-            )}
-          >
-            Solo sotto {SOGLIA_LENTI} km/h
-          </button>
-          <span className="text-[11px] text-muted-foreground">
-            {formattaNumero(elencabili.length)} segmenti
-          </span>
-        </div>
-      )}
-
       {!ordinati.length ? (
         <div className="px-4 py-10 text-center text-sm text-muted-foreground">
           Nessun segmento con questi filtri.
@@ -173,9 +133,7 @@ export function BusTable({ segmenti, scala, selezionati, onSeleziona }: Props) {
                         aria-hidden
                       />
                       <span className="tabular">
-                        {scala.campo === 'vel'
-                          ? valore.toFixed(1).replace('.', ',')
-                          : valore}
+                        {scala.campo === 'vel' ? formattaVelocita(valore) : valore}
                       </span>
                     </span>
                   </TableCell>

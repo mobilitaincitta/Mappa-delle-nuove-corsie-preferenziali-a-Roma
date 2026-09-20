@@ -109,10 +109,21 @@ i piu' lenti in velocita', i punteggi piu' alti nel benefit — e disegna al
 massimo 300 righe: quasi 4000 nel DOM rendono lo scorrimento a scatti per una
 lista che serve a leggere gli estremi. I filtri di classe restringono anche qui.
 
-Nella lista della velocita' c'e' anche un interruttore «solo sotto 5 km/h»: sotto
-quella soglia stanno 500 segmenti e 201 km, un ottavo della rete, che dentro la
-fascia 0-10 non si distinguono. Resta un filtro della sola lista: spezzare la
-classificazione cambierebbe la lettura della mappa per tutti.
+Sotto i 5 km/h la velocita' si scrive «< 5», senza decimale: a quelle velocita'
+il GPS di un bus fermo in coda oscilla, e «0,1» o «2,3» sono rumore di misura,
+non velocita'. Vale ovunque compaia una velocita' — lista, scheda, popup, media
+della selezione. La classificazione a quattro classi non cambia. Sono 500
+segmenti e 201 km, un ottavo della rete.
+
+Le selezioni sopravvivono ai filtri ma contano e si evidenziano solo se visibili:
+un tratto scelto e poi nascosto da una classe o da uno scenario spento non ha
+alone ne' scheda, e ricompare riaccendendo il filtro. In analisi la ricerca di
+una strada seleziona i segmenti bus con quel nome, non le corsie nascoste.
+
+Se `velocita.json` non arriva, l'errore resta nel pannello con un «Riprova»: la
+mappa del piano non sparisce perche' un secondo file e' fallito. Sotto i 640 px
+la legenda in mappa parte chiusa, altrimenti coprirebbe quasi tutta la mappa di
+un telefono.
 
 In tutte e tre le analisi le categorie si accendono e si spengono dalla stessa
 barra divisa: gli scenari in «scenario», le quattro classi in velocita' e

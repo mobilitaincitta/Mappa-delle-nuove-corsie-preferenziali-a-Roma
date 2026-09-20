@@ -19,7 +19,7 @@ import type {
   PropVelocita,
   Velocita,
 } from '@/lib/types'
-import { formattaLunghezza } from '@/lib/format'
+import { formattaLunghezza, formattaVelocita } from '@/lib/format'
 import { SCALE, filtroClassi, type Scala } from '@/lib/analisi'
 
 export interface MapHandle {
@@ -429,7 +429,7 @@ export function MapView({
              <div class="mt-1 text-muted-foreground">${
                scala?.campo === 'ben'
                  ? `benefit ${p.ben} su 100`
-                 : `${Number(p.vel).toFixed(1).replace('.', ',')} km/h`
+                 : `${formattaVelocita(Number(p.vel))} km/h`
              } · ${formattaLunghezza(Number(p.len))}</div>
              <div class="mt-0.5 text-muted-foreground">${escapeHtml(
                p.da ?? ''

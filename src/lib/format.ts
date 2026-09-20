@@ -16,6 +16,19 @@ export function formattaLunghezza(metri: number): string {
   return formattaKm(metri)
 }
 
+/**
+ * Sotto i 5 km/h la cifra decimale non racconta niente di vero: a quelle
+ * velocità il GPS di un bus fermo in coda oscilla, e «0,1» o «2,3» sono
+ * rumore di misura, non velocità. Si scrive la soglia, senza il decimale che
+ * finge una precisione che non c'è.
+ */
+export const SOGLIA_VELOCITA_MINIMA = 5
+
+export function formattaVelocita(kmh: number): string {
+  if (kmh < SOGLIA_VELOCITA_MINIMA) return `< ${SOGLIA_VELOCITA_MINIMA}`
+  return kmh.toFixed(1).replace('.', ',')
+}
+
 export function formattaNumero(n: number): string {
   return int.format(n)
 }

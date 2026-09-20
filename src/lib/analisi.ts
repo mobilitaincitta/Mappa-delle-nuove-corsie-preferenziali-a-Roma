@@ -64,9 +64,19 @@ export const tutteLeClassi = (scala: Scala) => scala.etichette.map((_, i) => i)
  */
 export function filtroClassi(scala: Scala, attive: Set<number>): unknown[] | null {
   if (attive.size === scala.etichette.length) return null
-  if (attive.size === 0) return ['==', 1, 0]
+  // Un filtro sempre falso. Non `['==', 1, 0]`: MapLibre lo legge come filtro
+  // nella sintassi vecchia, dove il secondo elemento è il nome di una proprietà,
+  // lo rifiuta con un errore in console e tiene quello di prima — così la mappa
+  // continuava a mostrare l'ultima classe spenta mentre il pannello diceva zero.
+  // Con `['get', …]` al secondo posto è inequivocabilmente un'espressione.
+  if (attive.size === 0) return ['==', ['get', 'id'], -1]
   const campo = ['get', scala.campo]
-  const rami = [...attive].map((i) => {
+  // Un indice oltre l'ultima classe — un insieme rimasto da una scala con più
+  // gradini — produrrebbe un ramo con una soglia undefined, che MapLibre rifiuta
+  // tenendosi il filtro precedente. Meglio ignorarlo che rompere tutto il filtro.
+  const valide = [...attive].filter((i) => i >= 0 && i < scala.etichette.length)
+  if (valide.length === 0) return ['==', ['get', 'id'], -1]
+  const rami = valide.map((i) => {
     const sopra = i > 0 ? ['>=', campo, scala.soglie[i - 1]] : null
     const sotto = i < scala.soglie.length ? ['<', campo, scala.soglie[i]] : null
     if (sopra && sotto) return ['all', sopra, sotto]

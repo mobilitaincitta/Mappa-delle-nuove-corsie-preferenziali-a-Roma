@@ -25,7 +25,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { TooltipProvider } from '@/components/ui/tooltip'
 
 import { caricaDataset, caricaVelocita } from '@/lib/dataset'
-import { costruisciIndice, bboxDiFeature } from '@/lib/streets'
+import { costruisciIndice, bboxDiFeature, normalizza } from '@/lib/streets'
 import { formattaNumero } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import type { Dataset, Filtri, ModoAnalisi, Scenario, Velocita } from '@/lib/types'
@@ -62,6 +62,9 @@ export default function App() {
   // uno dei due strati, una volta sola, e restano per il resto della sessione.
   const [velocita, setVelocita] = useState<Velocita | null>(null)
   const [caricandoAnalisi, setCaricandoAnalisi] = useState(false)
+  // Un errore dell'analisi è dell'analisi: la mappa del piano non ha motivo di
+  // sparire perché un secondo file non è arrivato.
+  const [erroreAnalisi, setErroreAnalisi] = useState<string | null>(null)
 
   /** Cambiando analisi cambia il soggetto: la selezione precedente non vale più. */
   const cambiaAnalisi = (modo: ModoAnalisi) => {
@@ -78,9 +81,10 @@ export default function App() {
     mappa.current?.pulisciEvidenza()
     if (modo === 'scenario' || velocita || caricandoAnalisi) return
     setCaricandoAnalisi(true)
+    setErroreAnalisi(null)
     caricaVelocita()
       .then(setVelocita)
-      .catch((e: Error) => setErrore(e.message))
+      .catch((e: Error) => setErroreAnalisi(e.message))
       .finally(() => setCaricandoAnalisi(false))
   }
 
@@ -114,12 +118,19 @@ export default function App() {
       .reduce((acc, g) => acc + g.len, 0)
   }, [dataset, filtri])
 
+  /**
+   * La selezione resta, ma conta e si evidenzia solo ciò che i filtri lasciano
+   * in mappa: un alone giallo intorno a un tratto invisibile non spiega niente.
+   * Spegnere una classe e riaccenderla ritrova la selezione com'era.
+   */
   const segmenti = useMemo(
     () =>
       dataset
-        ? dataset.proposte.features.filter((f) => selezionati.has(f.properties.id))
+        ? dataset.proposte.features.filter(
+            (f) => selezionati.has(f.properties.id) && filtri.scenari.has(f.properties.scenario)
+          )
         : [],
-    [dataset, selezionati]
+    [dataset, selezionati, filtri.scenari]
   )
   const segmento = segmenti.length === 1 ? segmenti[0] : null
 
@@ -132,8 +143,16 @@ export default function App() {
   }, [velocita, filtri.analisi, filtri.classi])
 
   const segmentiBus = useMemo(
-    () => (velocita ? velocita.features.filter((f) => selezionatiBus.has(f.properties.id)) : []),
-    [velocita, selezionatiBus]
+    () => busFiltrati.filter((f) => selezionatiBus.has(f.properties.id)),
+    [busFiltrati, selezionatiBus]
+  )
+  const visibiliSelezionati = useMemo(
+    () => new Set(segmenti.map((f) => f.properties.id)),
+    [segmenti]
+  )
+  const visibiliSelezionatiBus = useMemo(
+    () => new Set(segmentiBus.map((f) => f.properties.id)),
+    [segmentiBus]
   )
   /**
    * L'inquadratura segue la selezione: ogni volta che cambia, la vista si
@@ -226,9 +245,21 @@ export default function App() {
               classeTrigger="border-transparent bg-white text-muted-foreground shadow-sm hover:bg-white"
               indice={indice}
               onSceltaLocale={(voce) => {
-                mappa.current?.evidenzia(voce.proposte, voce.esistenti)
-                mappa.current?.inquadra(voce.bbox)
-                setSelezionati(new Set(voce.proposte))
+                if (filtri.analisi === 'scenario') {
+                  mappa.current?.evidenzia(voce.proposte, voce.esistenti)
+                  mappa.current?.inquadra(voce.bbox)
+                  setSelezionati(new Set(voce.proposte))
+                  return
+                }
+                // In analisi le corsie non sono in mappa: evidenziarle
+                // accenderebbe un alone intorno a niente. Il soggetto sono i
+                // segmenti bus con quel nome di strada; se non ce ne sono, si
+                // inquadra e basta.
+                const omonimi = (velocita?.features ?? [])
+                  .filter((f) => normalizza(f.properties.nome) === voce.norm)
+                  .map((f) => f.properties.id)
+                setSelezionatiBus(new Set(omonimi))
+                if (!omonimi.length) mappa.current?.inquadra(voce.bbox)
               }}
               onSceltaRemota={(r) => {
                 mappa.current?.pulisciEvidenza()
@@ -267,6 +298,8 @@ export default function App() {
                   analisi={filtri.analisi}
                   onCambia={cambiaAnalisi}
                   caricando={caricandoAnalisi}
+                  errore={erroreAnalisi}
+                  onRiprova={() => cambiaAnalisi(filtri.analisi)}
                 />
 
                 {filtri.analisi !== 'scenario' ? (
@@ -399,11 +432,11 @@ export default function App() {
                   dataset={dataset}
                   velocita={velocita}
                   filtri={filtri}
-                  selezionati={selezionati}
+                  selezionati={visibiliSelezionati}
                   onSelezione={(id) =>
                     setSelezionati((s) => (id == null ? new Set() : commuta(s, id)))
                   }
-                  selezionatiBus={selezionatiBus}
+                  selezionatiBus={visibiliSelezionatiBus}
                   onSelezioneBus={(id) =>
                     setSelezionatiBus((s) => (id == null ? new Set() : commuta(s, id)))
                   }
