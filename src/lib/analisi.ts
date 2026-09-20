@@ -31,7 +31,7 @@ export const SCALE: Record<Exclude<ModoAnalisi, 'scenario'>, Scala> = {
   },
   benefit: {
     titolo: 'Benefit score',
-    unita: 'scenario 2',
+    unita: 'su 100',
     campo: 'ben',
     soglie: [25, 50, 75],
     etichette: ['0 – 25', '25 – 50', '50 – 75', '75 – 100'],
