@@ -4,12 +4,15 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { classe, type Scala } from '@/lib/analisi'
+import { cn } from '@/lib/utils'
 import { formattaKm, formattaLunghezza, formattaNumero, formattaPercento } from '@/lib/format'
 import type { Feature, PropVelocita, Velocita } from '@/lib/types'
 
 interface Props {
   scala: Scala
   velocita: Velocita | null
+  classiAttive: Set<number>
+  onToggleClasse: (i: number) => void
   segmento: Feature<PropVelocita> | null
   onChiudi: () => void
   onInquadra: () => void
@@ -22,7 +25,15 @@ interface Props {
  * Le classi portano i km oltre al numero di segmenti: 400 spezzoni corti e 400
  * lunghi sono la stessa riga in un conteggio, e due realtà diverse in strada.
  */
-export function AnalisiPanel({ scala, velocita, segmento, onChiudi, onInquadra }: Props) {
+export function AnalisiPanel({
+  scala,
+  velocita,
+  classiAttive,
+  onToggleClasse,
+  segmento,
+  onChiudi,
+  onInquadra,
+}: Props) {
   const features = velocita?.features ?? []
   const classi = scala.etichette.map((etichetta, i) => ({
     etichetta,
@@ -37,19 +48,27 @@ export function AnalisiPanel({ scala, velocita, segmento, onChiudi, onInquadra }
     riga.metri += f.properties.len
   }
   const metriTotali = classi.reduce((a, c) => a + c.metri, 0)
+  const accese = classi.filter((c) => classiAttive.has(c._i))
+  const metriAccesi = accese.reduce((a, c) => a + c.metri, 0)
+  const nAccesi = accese.reduce((a, c) => a + c.n, 0)
+  const filtroAttivo = classiAttive.size !== classi.length
 
   return (
     <div className="grid gap-3 p-4">
       <Card className="gap-0 px-4 py-3.5">
-        <div className="text-xs font-medium text-muted-foreground">{scala.titolo}</div>
+        <div className="text-xs font-medium text-muted-foreground">
+          {filtroAttivo ? 'Selezione corrente' : scala.titolo}
+        </div>
         <div className="mt-1 flex items-baseline gap-2">
           <span className="text-3xl leading-none font-semibold tracking-tight">
-            {formattaNumero(features.length)}
+            {formattaNumero(nAccesi)}
           </span>
-          <span className="text-sm text-muted-foreground">segmenti osservati</span>
+          <span className="text-sm text-muted-foreground">
+            segmenti{filtroAttivo && ` su ${formattaNumero(features.length)}`}
+          </span>
         </div>
         <div className="mt-1.5 text-xs text-muted-foreground">
-          {formattaKm(metriTotali)} di rete bus &middot; misurati fra due fermate
+          {formattaKm(metriAccesi)} di rete bus &middot; misurati fra due fermate
         </div>
       </Card>
 
@@ -61,20 +80,37 @@ export function AnalisiPanel({ scala, velocita, segmento, onChiudi, onInquadra }
 
         {/* Barra unica divisa in quattro: la domanda è come si ripartisce la
             rete, che è una composizione di un intero. */}
+        {/* Le classi si accendono e si spengono come gli scenari: stessa barra
+            divisa, stesse righe che fanno da legenda e da filtro insieme. */}
         <div className="flex h-2.5 w-full gap-0.5 overflow-hidden rounded-full">
           {classi.map((c) => (
-            <span
+            <button
               key={c.etichetta}
+              type="button"
+              onClick={() => onToggleClasse(c._i)}
               style={{ flexGrow: c.metri, backgroundColor: c.tinta }}
               title={`${c.etichetta} — ${formattaKm(c.metri)}`}
-              className="h-full min-w-1 rounded-full first:rounded-l-full last:rounded-r-full"
+              aria-label={`Mostra o nascondi la classe ${c.etichetta}`}
+              className={cn(
+                'h-full min-w-1 cursor-pointer rounded-full transition-opacity first:rounded-l-full last:rounded-r-full',
+                !classiAttive.has(c._i) && 'opacity-20'
+              )}
             />
           ))}
         </div>
 
         <div className="grid gap-1">
           {classi.map((c) => (
-            <div key={c.etichetta} className="flex items-center gap-2.5 px-1.5 py-1">
+            <button
+              key={c.etichetta}
+              type="button"
+              onClick={() => onToggleClasse(c._i)}
+              aria-pressed={classiAttive.has(c._i)}
+              className={cn(
+                'flex items-center gap-2.5 rounded-md px-1.5 py-1.5 text-left transition-colors hover:bg-accent/60',
+                !classiAttive.has(c._i) && 'opacity-45'
+              )}
+            >
               <span
                 className="size-2.5 shrink-0 rounded-full ring-1 ring-black/10"
                 style={{ backgroundColor: c.tinta }}
@@ -86,7 +122,7 @@ export function AnalisiPanel({ scala, velocita, segmento, onChiudi, onInquadra }
               <span className="tabular w-9 shrink-0 text-right text-[11px] text-muted-foreground">
                 {formattaPercento(c.metri, metriTotali)}
               </span>
-            </div>
+            </button>
           ))}
         </div>
       </Card>

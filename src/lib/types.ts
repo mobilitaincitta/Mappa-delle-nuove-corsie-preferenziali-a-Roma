@@ -122,6 +122,8 @@ export interface Filtri {
   mostraEsistenti: boolean
   mostraMetro: boolean
   analisi: ModoAnalisi
+  /** Classi accese dell'analisi in corso, per indice. */
+  classi: Set<number>
 }
 
 export type Bbox = [number, number, number, number]

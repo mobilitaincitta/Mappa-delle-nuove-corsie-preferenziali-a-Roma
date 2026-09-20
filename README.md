@@ -93,7 +93,13 @@ pannello racconta quella:
 | Benefit | gli stessi segmenti | km per classe, dettaglio del segmento |
 
 Non si sommano: hanno soggetti diversi e in mappa si clicca l'uno o l'altro.
-Cambiando analisi la selezione si azzera, perche' non vorrebbe piu' dire niente.
+Cambiando analisi la selezione si azzera, perche' non vorrebbe piu' dire niente,
+e tornano accese tutte le classi.
+
+In tutte e tre le analisi le categorie si accendono e si spengono dalla stessa
+barra divisa: gli scenari in «scenario», le quattro classi in velocita' e
+benefit. Le righe sotto la barra fanno da legenda e da filtro insieme, e il
+riquadro in cima passa a «selezione corrente» con i km di cio' che resta acceso.
 
 Il pannello si chiude dal pulsante in alto a sinistra: incorporata in una
 colonna stretta, la mappa vale piu' dei numeri.

@@ -43,3 +43,26 @@ export const SCALE: Record<Exclude<ModoAnalisi, 'scenario'>, Scala> = {
 export function classe(scala: Scala, valore: number): number {
   return scala.soglie.filter((s) => valore >= s).length
 }
+
+export const TUTTE_LE_CLASSI = [0, 1, 2, 3]
+
+/**
+ * Filtro MapLibre per le sole classi accese.
+ *
+ * Le classi sono intervalli contigui, quindi il ramo di ciascuna è una coppia
+ * di disuguaglianze — tranne la prima e l'ultima, che hanno un solo estremo:
+ * scrivere un confronto con l'infinito funzionerebbe in JavaScript ma non in
+ * un'espressione di stile.
+ */
+export function filtroClassi(scala: Scala, attive: Set<number>): unknown[] | null {
+  if (attive.size === TUTTE_LE_CLASSI.length) return null
+  if (attive.size === 0) return ['==', 1, 0]
+  const campo = ['get', scala.campo]
+  const rami = [...attive].map((i) => {
+    const sopra = i > 0 ? ['>=', campo, scala.soglie[i - 1]] : null
+    const sotto = i < scala.soglie.length ? ['<', campo, scala.soglie[i]] : null
+    if (sopra && sotto) return ['all', sopra, sotto]
+    return (sopra ?? sotto) as unknown[]
+  })
+  return ['any', ...rami]
+}

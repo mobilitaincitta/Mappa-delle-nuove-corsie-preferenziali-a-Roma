@@ -20,7 +20,7 @@ import type {
   Velocita,
 } from '@/lib/types'
 import { formattaLunghezza } from '@/lib/format'
-import { SCALE, type Scala } from '@/lib/analisi'
+import { SCALE, filtroClassi, type Scala } from '@/lib/analisi'
 
 export interface MapHandle {
   inquadra: (bbox: Bbox, zoomMax?: number) => void
@@ -564,9 +564,9 @@ export function MapView({
     if (!velocita) return
     quandoPronta((map) => {
       creaAnalisi(map, velocita)
-      aggiornaAnalisi(map, filtri.analisi)
+      aggiornaAnalisi(map, filtri.analisi, filtri.classi)
     })
-  }, [velocita, filtri.analisi, quandoPronta])
+  }, [velocita, filtri.analisi, filtri.classi, quandoPronta])
 
   // --- filtri ------------------------------------------------------------
   useEffect(() => {
@@ -706,7 +706,7 @@ function creaAnalisi(map: MapLibreMap, velocita: Velocita) {
   )
 }
 
-function aggiornaAnalisi(map: MapLibreMap, modo: ModoAnalisi) {
+function aggiornaAnalisi(map: MapLibreMap, modo: ModoAnalisi, classi: Set<number>) {
   if (!map.getLayer('analisi')) return
   const acceso = modo !== 'scenario'
   for (const id of ['analisi', 'analisi-click']) {
@@ -718,6 +718,11 @@ function aggiornaAnalisi(map: MapLibreMap, modo: ModoAnalisi) {
   const colori = leggiColori()
   const tinte = modo === 'velocita' ? colori.vel : colori.ben
   map.setPaintProperty('analisi', 'line-color', coloreAGradini(SCALE[modo], tinte) as never)
+
+  const filtro = filtroClassi(SCALE[modo], classi)
+  for (const id of ['analisi', 'analisi-click']) {
+    if (map.getLayer(id)) map.setFilter(id, (filtro ?? null) as never)
+  }
 }
 
 // --- etichette delle stazioni ---------------------------------------------

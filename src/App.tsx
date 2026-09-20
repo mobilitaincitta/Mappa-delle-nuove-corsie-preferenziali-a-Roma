@@ -6,7 +6,7 @@ import { PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { MapView, type MapHandle } from '@/components/map-view'
 import { AnalisiControl } from '@/components/analisi-control'
 import { AnalisiPanel } from '@/components/analisi-panel'
-import { SCALE } from '@/lib/analisi'
+import { SCALE, TUTTE_LE_CLASSI } from '@/lib/analisi'
 import { StreetSearch } from '@/components/street-search'
 import { StatTiles } from '@/components/stat-tiles'
 import { ScenarioControl } from '@/components/scenario-control'
@@ -43,6 +43,7 @@ export default function App() {
     mostraEsistenti: true,
     mostraMetro: true,
     analisi: 'scenario',
+    classi: new Set(TUTTE_LE_CLASSI),
   })
 
   // I segmenti osservati pesano 1,4 MB: si scaricano alla prima accensione di
@@ -52,7 +53,7 @@ export default function App() {
 
   /** Cambiando analisi cambia il soggetto: la selezione precedente non vale più. */
   const cambiaAnalisi = (modo: ModoAnalisi) => {
-    setFiltri((f) => ({ ...f, analisi: modo }))
+    setFiltri((f) => ({ ...f, analisi: modo, classi: new Set(TUTTE_LE_CLASSI) }))
     setSelezionato(null)
     setSelezionatoBus(null)
     mappa.current?.pulisciEvidenza()
@@ -132,6 +133,14 @@ export default function App() {
   }
 
   const filtriAttivi = !!dataset && filtri.scenari.size !== TUTTI_SCENARI.length
+
+  const toggleClasse = (i: number) =>
+    setFiltri((f) => {
+      const classi = new Set(f.classi)
+      if (classi.has(i)) classi.delete(i)
+      else classi.add(i)
+      return { ...f, classi }
+    })
 
   const toggleScenario = (s: Scenario) =>
     setFiltri((f) => {
@@ -230,6 +239,8 @@ export default function App() {
                     <AnalisiPanel
                       scala={SCALE[filtri.analisi]}
                       velocita={velocita}
+                      classiAttive={filtri.classi}
+                      onToggleClasse={toggleClasse}
                       segmento={segmentoBus}
                       onChiudi={() => setSelezionatoBus(null)}
                       onInquadra={() =>
