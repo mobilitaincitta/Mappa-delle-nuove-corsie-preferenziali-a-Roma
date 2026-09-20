@@ -1,7 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { TriangleAlert } from 'lucide-react'
 
+import { PanelLeftClose, PanelLeftOpen } from 'lucide-react'
+
 import { MapView, type MapHandle } from '@/components/map-view'
+import { AnalisiControl } from '@/components/analisi-control'
+import { AnalisiPanel } from '@/components/analisi-panel'
+import { SCALE } from '@/lib/analisi'
 import { StreetSearch } from '@/components/street-search'
 import { StatTiles } from '@/components/stat-tiles'
 import { ScenarioControl } from '@/components/scenario-control'
@@ -10,6 +15,7 @@ import { SegmentTable } from '@/components/segment-table'
 import { Legend } from '@/components/legend'
 
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -19,6 +25,7 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import { caricaDataset, caricaVelocita } from '@/lib/dataset'
 import { costruisciIndice, bboxDiFeature } from '@/lib/streets'
 import { formattaNumero } from '@/lib/format'
+import { cn } from '@/lib/utils'
 import type { Dataset, Filtri, ModoAnalisi, Scenario, Velocita } from '@/lib/types'
 
 const TUTTI_SCENARI: Scenario[] = [1, 2, 3]
@@ -27,13 +34,15 @@ export default function App() {
   const [dataset, setDataset] = useState<Dataset | null>(null)
   const [errore, setErrore] = useState<string | null>(null)
   const [selezionato, setSelezionato] = useState<number | null>(null)
+  const [selezionatoBus, setSelezionatoBus] = useState<number | null>(null)
+  const [pannelloAperto, setPannelloAperto] = useState(true)
   const mappa = useRef<MapHandle>(null)
 
   const [filtri, setFiltri] = useState<Filtri>({
     scenari: new Set(TUTTI_SCENARI),
     mostraEsistenti: true,
     mostraMetro: true,
-    analisi: 'nessuna',
+    analisi: 'scenario',
   })
 
   // I segmenti osservati pesano 1,4 MB: si scaricano alla prima accensione di
@@ -41,9 +50,13 @@ export default function App() {
   const [velocita, setVelocita] = useState<Velocita | null>(null)
   const [caricandoAnalisi, setCaricandoAnalisi] = useState(false)
 
+  /** Cambiando analisi cambia il soggetto: la selezione precedente non vale più. */
   const cambiaAnalisi = (modo: ModoAnalisi) => {
     setFiltri((f) => ({ ...f, analisi: modo }))
-    if (modo === 'nessuna' || velocita || caricandoAnalisi) return
+    setSelezionato(null)
+    setSelezionatoBus(null)
+    mappa.current?.pulisciEvidenza()
+    if (modo === 'scenario' || velocita || caricandoAnalisi) return
     setCaricandoAnalisi(true)
     caricaVelocita()
       .then(setVelocita)
@@ -89,6 +102,14 @@ export default function App() {
     [dataset, selezionato]
   )
 
+  const segmentoBus = useMemo(
+    () =>
+      velocita && selezionatoBus != null
+        ? (velocita.features.find((f) => f.properties.id === selezionatoBus) ?? null)
+        : null,
+    [velocita, selezionatoBus]
+  )
+
   const omonimi = useMemo(() => {
     if (!dataset || !segmento) return []
     return dataset.proposte.features.filter(
@@ -124,6 +145,22 @@ export default function App() {
     <TooltipProvider delayDuration={200}>
       <div className="flex h-full flex-col">
         <header className="z-20 flex shrink-0 flex-wrap items-center gap-2 border-b px-4 py-2.5">
+          {/* Il pannello si chiude: incorporata in una colonna stretta, o su
+              uno schermo piccolo, la mappa vale più dei numeri. */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setPannelloAperto((v) => !v)}
+            className="hidden size-8 shrink-0 text-muted-foreground lg:inline-flex"
+            aria-label={pannelloAperto ? 'Chiudi il pannello' : 'Apri il pannello'}
+            aria-expanded={pannelloAperto}
+          >
+            {pannelloAperto ? (
+              <PanelLeftClose className="size-4" />
+            ) : (
+              <PanelLeftOpen className="size-4" />
+            )}
+          </Button>
           <div className="mr-auto min-w-0">
             <div className="flex items-center gap-2">
               <h1 className="truncate text-sm font-semibold">
@@ -155,9 +192,21 @@ export default function App() {
           )}
         </header>
 
-        <div className="grid min-h-0 flex-1 lg:grid-cols-[minmax(320px,380px)_1fr]">
-          {/* Pannello: su schermi stretti scorre sotto la mappa. */}
-          <aside className="order-2 flex min-h-0 flex-col border-t lg:order-1 lg:border-t-0 lg:border-r">
+        <div
+          className={cn(
+            'grid min-h-0 flex-1',
+            pannelloAperto ? 'lg:grid-cols-[minmax(320px,380px)_1fr]' : 'lg:grid-cols-[0_1fr]'
+          )}
+        >
+          {/* Pannello: su schermi stretti scorre sotto la mappa. Da chiuso
+              resta nel flusso ma a larghezza zero, così non si smonta e la
+              posizione di scorrimento sopravvive alla riapertura. */}
+          <aside
+            className={cn(
+              'order-2 flex min-h-0 flex-col border-t lg:order-1 lg:border-t-0 lg:border-r',
+              !pannelloAperto && 'hidden lg:flex lg:overflow-hidden lg:border-r-0'
+            )}
+          >
             {!dataset ? (
               <div className="grid gap-3 p-4">
                 <Skeleton className="h-24 w-full" />
@@ -165,6 +214,27 @@ export default function App() {
                 <Skeleton className="h-40 w-full" />
               </div>
             ) : (
+              <>
+                <AnalisiControl
+                  analisi={filtri.analisi}
+                  onCambia={cambiaAnalisi}
+                  caricando={caricandoAnalisi}
+                />
+
+                {filtri.analisi !== 'scenario' ? (
+                  <ScrollArea className="min-h-0 flex-1">
+                    <AnalisiPanel
+                      scala={SCALE[filtri.analisi]}
+                      velocita={velocita}
+                      segmento={segmentoBus}
+                      onChiudi={() => setSelezionatoBus(null)}
+                      onInquadra={() =>
+                        segmentoBus &&
+                        mappa.current?.inquadra(bboxDiFeature([segmentoBus]), 17)
+                      }
+                    />
+                  </ScrollArea>
+                ) : (
               <Tabs defaultValue="panoramica" className="flex min-h-0 flex-1 flex-col gap-0">
                 <TabsList className="mx-4 mt-3 grid w-auto grid-cols-2">
                   <TabsTrigger value="panoramica">Panoramica</TabsTrigger>
@@ -224,6 +294,8 @@ export default function App() {
                   />
                 </TabsContent>
               </Tabs>
+                )}
+              </>
             )}
           </aside>
 
@@ -237,6 +309,8 @@ export default function App() {
                   filtri={filtri}
                   selezionato={selezionato}
                   onSelezione={setSelezionato}
+                  selezionatoBus={selezionatoBus}
+                  onSelezioneBus={setSelezionatoBus}
                 />
                 <div className="pointer-events-none absolute top-3 left-3 z-10">
                   <Legend
@@ -248,9 +322,6 @@ export default function App() {
                     onToggleMetro={() =>
                       setFiltri((f) => ({ ...f, mostraMetro: !f.mostraMetro }))
                     }
-                    analisi={filtri.analisi}
-                    onCambiaAnalisi={cambiaAnalisi}
-                    caricandoAnalisi={caricandoAnalisi}
                   />
                 </div>
               </>

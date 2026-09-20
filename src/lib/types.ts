@@ -6,15 +6,6 @@ export interface PropProposta {
   scenario: Scenario
   len: number
   tratti: number
-  /**
-   * Velocità e benefit dei segmenti bus che passano su questo tratto, media
-   * pesata su quanto ciascuno lo copre. Assenti se nessun bus osservato ci
-   * transita.
-   */
-  vel?: number
-  ben?: number
-  /** Su quanti segmenti osservati è calcolata la media. */
-  nseg?: number
 }
 
 export interface PropEsistente {
@@ -103,10 +94,11 @@ export interface PropVelocita {
 export type Velocita = Collezione<PropVelocita>
 
 /**
- * Quale dei due strati di analisi è acceso. Si escludono: colorano gli stessi
- * segmenti, e sovrapporli non vorrebbe dire niente.
+ * Quale delle tre analisi è in corso. Si escludono: ognuna ha un soggetto
+ * diverso — i tratti del piano nella prima, i segmenti bus osservati nelle
+ * altre due — e il pannello di sinistra racconta quella attiva.
  */
-export type ModoAnalisi = 'nessuna' | 'velocita' | 'benefit'
+export type ModoAnalisi = 'scenario' | 'velocita' | 'benefit'
 
 /** Confine comunale: linea da disegnare e riquadro entro cui tenere la vista. */
 export interface Confine {

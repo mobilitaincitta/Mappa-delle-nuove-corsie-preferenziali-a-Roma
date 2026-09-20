@@ -10,8 +10,7 @@
     "data": "node scripts/build-data.mjs",
     "metro": "node scripts/build-metro.mjs",
     "confine": "node scripts/build-confine.mjs",
-    "velocita": "python scripts/build-velocita.py",
-    "analisi": "python scripts/abbina-analisi.py"
+    "velocita": "python scripts/build-velocita.py"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.6",

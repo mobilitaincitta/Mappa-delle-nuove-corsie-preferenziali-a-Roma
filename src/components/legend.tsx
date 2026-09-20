@@ -1,18 +1,13 @@
-import { Eye, EyeOff, Loader2 } from 'lucide-react'
+import { Eye, EyeOff } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import type { ModoAnalisi } from '@/lib/types'
-import { SCALE } from '@/lib/analisi'
 
 interface Props {
   mostraEsistenti: boolean
   onToggleEsistenti: () => void
   mostraMetro: boolean
   onToggleMetro: () => void
-  analisi: ModoAnalisi
-  onCambiaAnalisi: (modo: ModoAnalisi) => void
-  caricandoAnalisi: boolean
 }
 
 
@@ -34,11 +29,7 @@ export function Legend({
   onToggleEsistenti,
   mostraMetro,
   onToggleMetro,
-  analisi,
-  onCambiaAnalisi,
-  caricandoAnalisi,
 }: Props) {
-  const scala = analisi === 'nessuna' ? null : SCALE[analisi]
   return (
     <div className="pointer-events-auto w-[246px] rounded-lg border bg-card/95 p-3 shadow-sm backdrop-blur-sm">
       <div className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
@@ -101,66 +92,6 @@ export function Legend({
         ))}
         <span className="ml-0.5 text-[10px] text-muted-foreground">linee e stazioni</span>
       </div>
-
-      {/* I due strati colorano gli stessi segmenti: si scelgono, non si
-          sommano, quindi un selettore a tre stati e non due interruttori. */}
-      <div className="mt-3 border-t pt-2.5">
-        <div className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
-          Analisi dei segmenti bus
-        </div>
-        <div className="mt-2 grid grid-cols-3 gap-1 rounded-md bg-muted p-0.5">
-          {(
-            [
-              ['nessuna', 'Nessuna'],
-              ['velocita', 'Velocità'],
-              ['benefit', 'Benefit'],
-            ] as [ModoAnalisi, string][]
-          ).map(([modo, etichetta]) => (
-            <button
-              key={modo}
-              type="button"
-              onClick={() => onCambiaAnalisi(modo)}
-              aria-pressed={analisi === modo}
-              className={cn(
-                'rounded-[5px] px-1.5 py-1 text-[11px] transition-colors',
-                analisi === modo
-                  ? 'bg-card font-medium shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              )}
-            >
-              {etichetta}
-            </button>
-          ))}
-        </div>
-
-        {caricandoAnalisi && (
-          <div className="mt-2 flex items-center gap-1.5 text-[11px] text-muted-foreground">
-            <Loader2 className="size-3 animate-spin" />
-            Carico i segmenti…
-          </div>
-        )}
-
-        {scala && !caricandoAnalisi && (
-          <div className="mt-2">
-            <div className="text-[11px] text-muted-foreground">
-              {scala.titolo}
-              <span className="ml-1 opacity-70">({scala.unita})</span>
-            </div>
-            <div className="mt-1.5 grid gap-1">
-              {scala.etichette.map((testo, i) => (
-                <div key={testo} className="flex items-center gap-2">
-                  <span
-                    className="h-0.5 w-5 shrink-0 rounded-full"
-                    style={{ backgroundColor: scala.tinte[i] }}
-                  />
-                  <span className="text-xs">{testo}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
 
     </div>
   )

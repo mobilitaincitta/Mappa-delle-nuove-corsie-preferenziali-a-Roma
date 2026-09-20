@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { formattaLunghezza, formattaNumero } from '@/lib/format'
-import { SCALE, classe } from '@/lib/analisi'
 import { cn } from '@/lib/utils'
 import type { Feature, PropProposta } from '@/lib/types'
 
@@ -61,60 +60,16 @@ export function SegmentDetail({ segmento, omonimi, onChiudi, onInquadra, onVaiA 
         )}
       </div>
 
-      {/* I valori osservati non vengono dal piano: sono la media dei segmenti
-          bus che passano su questo tratto, pesata su quanto lo coprono. Il
-          pallino ripete la classe della legenda, così la scheda e la mappa
-          dicono la stessa cosa. */}
-      {(p.vel != null || p.ben != null || p.len < 5) && (
+      {p.len < 5 && (
         <>
           <Separator className="my-3" />
           <dl className="grid gap-2 text-[13px]">
-            {p.vel != null && (
-              <Riga etichetta="Velocità rilevata">
-                <span className="flex items-center gap-1.5">
-                  <span
-                    className="size-2 shrink-0 rounded-full"
-                    style={{
-                      backgroundColor: SCALE.velocita.tinte[classe(SCALE.velocita, p.vel)],
-                    }}
-                    aria-hidden
-                  />
-                  <span className="tabular">
-                    {p.vel.toFixed(1).replace('.', ',')} km/h
-                  </span>
-                </span>
-              </Riga>
-            )}
-            {p.ben != null && (
-              <Riga etichetta="Benefit score">
-                <span className="flex items-center gap-1.5">
-                  <span
-                    className="size-2 shrink-0 rounded-full"
-                    style={{
-                      backgroundColor: SCALE.benefit.tinte[classe(SCALE.benefit, p.ben)],
-                    }}
-                    aria-hidden
-                  />
-                  <span className="tabular">{p.ben} su 100</span>
-                  <span className="text-[11px] text-muted-foreground">scenario 2</span>
-                </span>
-              </Riga>
-            )}
-            {p.nseg != null && (
-              <Riga etichetta="Media su">
-                <span className="text-muted-foreground">
-                  {formattaNumero(p.nseg)} segmenti bus osservati
-                </span>
-              </Riga>
-            )}
-            {p.len < 5 && (
-              <Riga etichetta="Nota">
-                <span className="text-muted-foreground">
-                  Geometria di lunghezza trascurabile: probabile residuo di
-                  digitalizzazione.
-                </span>
-              </Riga>
-            )}
+            <Riga etichetta="Nota">
+              <span className="text-muted-foreground">
+                Geometria di lunghezza trascurabile: probabile residuo di
+                digitalizzazione.
+              </span>
+            </Riga>
           </dl>
         </>
       )}

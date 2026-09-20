@@ -10,7 +10,15 @@ import maplibregl, { type LngLatBoundsLike, type Map as MapLibreMap } from 'mapl
 import { TriangleAlert } from 'lucide-react'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
-import type { Bbox, Dataset, Filtri, ModoAnalisi, PropProposta, Velocita } from '@/lib/types'
+import type {
+  Bbox,
+  Dataset,
+  Filtri,
+  ModoAnalisi,
+  PropProposta,
+  PropVelocita,
+  Velocita,
+} from '@/lib/types'
 import { formattaLunghezza } from '@/lib/format'
 import { SCALE, type Scala } from '@/lib/analisi'
 
@@ -28,6 +36,8 @@ interface Props {
   filtri: Filtri
   selezionato: number | null
   onSelezione: (id: number | null) => void
+  selezionatoBus: number | null
+  onSelezioneBus: (id: number | null) => void
   ref?: Ref<MapHandle>
 }
 
@@ -108,6 +118,8 @@ export function MapView({
   filtri,
   selezionato,
   onSelezione,
+  selezionatoBus,
+  onSelezioneBus,
   ref,
 }: Props) {
   const contenitore = useRef<HTMLDivElement>(null)
@@ -117,6 +129,8 @@ export function MapView({
   const etichetteMetro = useRef<maplibregl.Marker[]>([])
   const onSelezioneRef = useRef(onSelezione)
   onSelezioneRef.current = onSelezione
+  const onSelezioneBusRef = useRef(onSelezioneBus)
+  onSelezioneBusRef.current = onSelezioneBus
 
   /**
    * Esegue un'operazione sulla mappa appena questa è utilizzabile.
@@ -137,6 +151,10 @@ export function MapView({
   // valore iniziale del filtro: qui ne legge sempre l'ultimo.
   const mostraMetroRef = useRef(filtri.mostraMetro)
   mostraMetroRef.current = filtri.mostraMetro
+  // I gestori di click e hover si registrano una volta sola: devono leggere
+  // l'analisi corrente, non quella che c'era al montaggio.
+  const analisiRef = useRef(filtri.analisi)
+  analisiRef.current = filtri.analisi
 
   const [guasto, setGuasto] = useState<string | null>(null)
   /** Vero finché l'inquadratura è ancora quella automatica di partenza. */
@@ -380,13 +398,7 @@ export function MapView({
              <div class="mt-1 text-muted-foreground">
                Scenario ${p.scenario} · ${formattaLunghezza(Number(p.len))}
              </div>
-             ${
-               p.vel != null
-                 ? `<div class="mt-0.5 text-muted-foreground">
-                      ${Number(p.vel).toFixed(1).replace('.', ',')} km/h · benefit ${p.ben}/100
-                    </div>`
-                 : ''
-             }
+
            </div>`
         )
         .addTo(map)
@@ -397,6 +409,46 @@ export function MapView({
       popup.current?.remove()
     })
 
+    map.on('mouseenter', 'analisi-click', () => {
+      map.getCanvas().style.cursor = 'pointer'
+    })
+
+    map.on('mousemove', 'analisi-click', (e) => {
+      const f = e.features?.[0]
+      if (!f) return
+      const p = f.properties as unknown as PropVelocita
+      const modo = analisiRef.current
+      const scala = modo === 'scenario' ? null : SCALE[modo]
+      popup.current
+        ?.setLngLat(e.lngLat)
+        .setHTML(
+          `<div class="px-3 py-2 text-xs">
+             <div class="font-medium text-[13px] leading-tight">${escapeHtml(
+               p.nome ?? 'Strada non indicata'
+             )}</div>
+             <div class="mt-1 text-muted-foreground">${
+               scala?.campo === 'ben'
+                 ? `benefit ${p.ben} su 100`
+                 : `${Number(p.vel).toFixed(1).replace('.', ',')} km/h`
+             } · ${formattaLunghezza(Number(p.len))}</div>
+             <div class="mt-0.5 text-muted-foreground">${escapeHtml(
+               p.da ?? ''
+             )} → ${escapeHtml(p.a ?? '')}</div>
+           </div>`
+        )
+        .addTo(map)
+    })
+
+    map.on('mouseleave', 'analisi-click', () => {
+      map.getCanvas().style.cursor = ''
+      popup.current?.remove()
+    })
+
+    map.on('click', 'analisi-click', (e) => {
+      const f = e.features?.[0]
+      if (f) onSelezioneBusRef.current(Number((f.properties as { id: number }).id))
+    })
+
     map.on('click', 'proposte-click', (e) => {
       const f = e.features?.[0]
       if (f) onSelezioneRef.current(Number((f.properties as { id: number }).id))
@@ -404,8 +456,13 @@ export function MapView({
 
     // Un click sul vuoto deseleziona.
     map.on('click', (e) => {
-      const sopra = map.queryRenderedFeatures(e.point, { layers: ['proposte-click'] })
-      if (!sopra.length) onSelezioneRef.current(null)
+      const strati = ['proposte-click']
+      if (map.getLayer('analisi-click')) strati.push('analisi-click')
+      const sopra = map.queryRenderedFeatures(e.point, { layers: strati })
+      if (!sopra.length) {
+        onSelezioneRef.current(null)
+        onSelezioneBusRef.current(null)
+      }
     })
 
     map.on('load', () => {
@@ -490,6 +547,17 @@ export function MapView({
     // Il dataset non cambia per la vita del componente: la mappa si crea una volta.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataset])
+
+  // --- segmento bus selezionato ------------------------------------------
+  useEffect(() => {
+    if (!velocita || selezionatoBus == null) return
+    const f = velocita.features.find((x) => x.properties.id === selezionatoBus)
+    if (!f) return
+    quandoPronta((map) => {
+      const sorgente = map.getSource('evidenza') as maplibregl.GeoJSONSource | undefined
+      sorgente?.setData({ type: 'FeatureCollection', features: [f] } as never)
+    })
+  }, [selezionatoBus, velocita, quandoPronta])
 
   // --- strati di analisi -------------------------------------------------
   useEffect(() => {
@@ -624,12 +692,29 @@ function creaAnalisi(map: MapLibreMap, velocita: Velocita) {
     },
     map.getLayer('evidenza') ? 'evidenza' : undefined
   )
+  // Stesso motivo dell'area di click sulle corsie: una linea di 4 px è un
+  // bersaglio troppo piccolo, soprattutto da telefono.
+  map.addLayer(
+    {
+      id: 'analisi-click',
+      type: 'line',
+      source: 'analisi',
+      paint: { 'line-color': '#000', 'line-opacity': 0, 'line-width': 18 },
+      layout: { visibility: 'none' },
+    },
+    map.getLayer('evidenza') ? 'evidenza' : undefined
+  )
 }
 
 function aggiornaAnalisi(map: MapLibreMap, modo: ModoAnalisi) {
   if (!map.getLayer('analisi')) return
-  map.setLayoutProperty('analisi', 'visibility', modo === 'nessuna' ? 'none' : 'visible')
-  if (modo === 'nessuna') return
+  const acceso = modo !== 'scenario'
+  for (const id of ['analisi', 'analisi-click']) {
+    if (map.getLayer(id)) {
+      map.setLayoutProperty(id, 'visibility', acceso ? 'visible' : 'none')
+    }
+  }
+  if (!acceso) return
   const colori = leggiColori()
   const tinte = modo === 'velocita' ? colori.vel : colori.ben
   map.setPaintProperty('analisi', 'line-color', coloreAGradini(SCALE[modo], tinte) as never)

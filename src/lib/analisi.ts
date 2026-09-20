@@ -20,7 +20,7 @@ export interface Scala {
   tinte: string[]
 }
 
-export const SCALE: Record<Exclude<ModoAnalisi, 'nessuna'>, Scala> = {
+export const SCALE: Record<Exclude<ModoAnalisi, 'scenario'>, Scala> = {
   velocita: {
     titolo: 'Velocità media rilevata',
     unita: 'km/h',

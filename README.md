@@ -57,21 +57,35 @@ Due limiti noti, entrambi risolvibili leggendo dei parametri nell'indirizzo:
 filtri e strada cercata non finiscono nell'URL, quindi non si puo' aprire la mappa
 su una vista specifica.
 
-## Analisi dei segmenti bus
+## Le tre analisi
 
-Due strati informativi sui 3992 segmenti di percorso osservati fra due fermate,
-da un GeoPackage QGIS esterno al repository, convertito con
-[`scripts/build-velocita.py`](scripts/build-velocita.py) (richiede geopandas):
+In cima al pannello di sinistra si sceglie **una** delle tre, e tutto il
+pannello racconta quella:
+
+| Analisi | Soggetto | Pannello |
+|---|---|---|
+| Scenario | i 275 tratti del piano | km per priorita', tabella dei segmenti, dettaglio del tratto |
+| Velocita | i 3992 segmenti bus osservati | km per classe, dettaglio del segmento |
+| Benefit | gli stessi segmenti | km per classe, dettaglio del segmento |
+
+Non si sommano: hanno soggetti diversi e in mappa si clicca l'uno o l'altro.
+Cambiando analisi la selezione si azzera, perche' non vorrebbe piu' dire niente.
+
+Il pannello si chiude dal pulsante in alto a sinistra: incorporata in una
+colonna stretta, la mappa vale piu' dei numeri.
+
+I segmenti osservati vengono da un GeoPackage QGIS esterno al repository,
+convertito con [`scripts/build-velocita.py`](scripts/build-velocita.py)
+(richiede geopandas):
 
 | Strato | Campo | Classi |
 |---|---|---|
 | Velocita media rilevata | `observed_avg_speed_kmh` | 0-10, 10-20, 20-30, oltre 30 km/h |
 | Benefit score | `scenario_2_benefit_score_total_100` | 0-25, 25-50, 50-75, 75-100 |
 
-**Si escludono a vicenda.** Colorano gli stessi segmenti, quindi in mappa non
-sono due layer ma uno solo, di cui cambia l'espressione di colore: non possono
-essere accesi insieme per costruzione. Stanno sotto la rete proposta — sono la
-diagnosi su cui si legge il piano, non il piano.
+In mappa velocita' e benefit non sono due layer ma uno solo, di cui cambia
+l'espressione di colore: non possono essere accesi insieme per costruzione. Sta
+sotto la rete proposta — e' la diagnosi su cui si legge il piano, non il piano.
 
 Dei sei benefit score del file (tre scenari x running/total) arriva in mappa
 solo quello dello scenario 2 «total», lo stesso su cui e' costruita la selezione
@@ -83,28 +97,6 @@ Il GeoJSON pesa 1,4 MB contro i ~500 KB di tutto il resto, quindi **non viene
 caricato all'avvio**: arriva alla prima accensione di uno dei due strati, una
 volta sola per sessione, con un avviso in legenda mentre scarica. Chi non apre
 l'analisi non lo scarica mai.
-
-### Gli stessi valori sui segmenti del piano
-
-Anche i 275 segmenti della rete proposta portano velocita' e benefit, mostrati
-nella loro scheda di dettaglio e nel popup della mappa.
-
-Le due fonti non hanno una chiave in comune — la rete proposta viene
-dall'export qgis2web, i segmenti osservati dal GeoPackage GTFS, e i nomi di
-strada sono scritti in modo diverso — quindi l'aggancio e' geometrico: ogni
-segmento osservato viene allargato di 10 m e si misura quanta parte della
-proposta ci cade dentro ([`scripts/abbina-analisi.py`](scripts/abbina-analisi.py)).
-
-Quella lunghezza e' anche il peso della media. Su una strada percorsa da piu'
-linee, o nei due sensi, lo stesso tratto compare in piu' segmenti osservati:
-pesarli per quanto coprono significa mediare sul traffico bus che quel tratto
-vede davvero, non sul numero di righe nel file. Via Cristoforo Colombo, per
-esempio, e' la media di 101 segmenti osservati.
-
-Tutte e 275 le proposte trovano un aggancio. Lo script va eseguito **dopo**
-`build-data.mjs` e `build-velocita.py`, perche' riscrive `proposte.json`:
-
-    npm run data && npm run velocita && npm run analisi
 
 ## Limiti della vista
 
