@@ -306,8 +306,8 @@ export default function App() {
                 qualunque analisi sia attiva e a qualunque punto della lista. */}
             <footer className="shrink-0 border-t px-4 py-3 text-[11px] leading-relaxed text-muted-foreground">
               <span className="font-medium text-foreground">A cura di</span> Caridad
-              Pineda, Matteo Collotti, Gaia Sgaramella, Giorgio Rubino, Giulia Galbiati,
-              Nicola Ippolito
+              Pineda, Matteo Collotti, Giulia Galbiati, Nicola Ippolito, Giorgio Rubino,
+              Gaia Sgaramella
             </footer>
           </aside>
 

@@ -78,8 +78,8 @@ distinguersi fra loro e dal piano, non ripeterne il colore.
 
 ## Autori
 
-Caridad Pineda, Matteo Collotti, Gaia Sgaramella, Giorgio Rubino, Giulia
-Galbiati, Nicola Ippolito.
+Caridad Pineda, poi in ordine alfabetico di cognome: Matteo Collotti, Giulia
+Galbiati, Nicola Ippolito, Giorgio Rubino, Gaia Sgaramella.
 
 ## Le tre analisi
 
