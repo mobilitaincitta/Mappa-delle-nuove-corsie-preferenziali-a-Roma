@@ -109,6 +109,11 @@ i piu' lenti in velocita', i punteggi piu' alti nel benefit — e disegna al
 massimo 300 righe: quasi 4000 nel DOM rendono lo scorrimento a scatti per una
 lista che serve a leggere gli estremi. I filtri di classe restringono anche qui.
 
+Nella lista della velocita' c'e' anche un interruttore «solo sotto 5 km/h»: sotto
+quella soglia stanno 500 segmenti e 201 km, un ottavo della rete, che dentro la
+fascia 0-10 non si distinguono. Resta un filtro della sola lista: spezzare la
+classificazione cambierebbe la lettura della mappa per tutti.
+
 In tutte e tre le analisi le categorie si accendono e si spengono dalla stessa
 barra divisa: gli scenari in «scenario», le quattro classi in velocita' e
 benefit. Le righe sotto la barra fanno da legenda e da filtro insieme, e il

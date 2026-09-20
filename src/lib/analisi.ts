@@ -44,7 +44,15 @@ export function classe(scala: Scala, valore: number): number {
   return scala.soglie.filter((s) => valore >= s).length
 }
 
-export const TUTTE_LE_CLASSI = [0, 1, 2, 3]
+/**
+ * Gli indici di tutte le classi di una scala.
+ *
+ * Le due scale non hanno lo stesso numero di gradini — la velocità ne ha
+ * cinque, il benefit quattro — quindi «tutte accese» non è una costante:
+ * dipende da quale scala si sta guardando, e un insieme rimasto dall'altra
+ * farebbe risultare un filtro attivo che non c'è.
+ */
+export const tutteLeClassi = (scala: Scala) => scala.etichette.map((_, i) => i)
 
 /**
  * Filtro MapLibre per le sole classi accese.
@@ -55,7 +63,7 @@ export const TUTTE_LE_CLASSI = [0, 1, 2, 3]
  * un'espressione di stile.
  */
 export function filtroClassi(scala: Scala, attive: Set<number>): unknown[] | null {
-  if (attive.size === TUTTE_LE_CLASSI.length) return null
+  if (attive.size === scala.etichette.length) return null
   if (attive.size === 0) return ['==', 1, 0]
   const campo = ['get', scala.campo]
   const rami = [...attive].map((i) => {

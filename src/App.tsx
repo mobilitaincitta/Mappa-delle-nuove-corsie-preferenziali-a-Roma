@@ -6,7 +6,7 @@ import { PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { MapView, type MapHandle } from '@/components/map-view'
 import { AnalisiControl } from '@/components/analisi-control'
 import { AnalisiPanel } from '@/components/analisi-panel'
-import { SCALE, TUTTE_LE_CLASSI, classe } from '@/lib/analisi'
+import { SCALE, classe, tutteLeClassi } from '@/lib/analisi'
 import { BusTable } from '@/components/bus-table'
 import { SelezioneScenari } from '@/components/selezione-scenari'
 import { StreetSearch } from '@/components/street-search'
@@ -55,7 +55,7 @@ export default function App() {
     mostraEsistenti: true,
     mostraMetro: true,
     analisi: 'scenario',
-    classi: new Set(TUTTE_LE_CLASSI),
+    classi: new Set(tutteLeClassi(SCALE.velocita)),
   })
 
   // I segmenti osservati pesano 1,4 MB: si scaricano alla prima accensione di
@@ -65,7 +65,14 @@ export default function App() {
 
   /** Cambiando analisi cambia il soggetto: la selezione precedente non vale più. */
   const cambiaAnalisi = (modo: ModoAnalisi) => {
-    setFiltri((f) => ({ ...f, analisi: modo, classi: new Set(TUTTE_LE_CLASSI) }))
+    // Le classi ripartono da quelle della scala di destinazione: velocità ne ha
+    // cinque, benefit quattro, e un insieme rimasto dall'altra sembrerebbe un
+    // filtro attivo.
+    setFiltri((f) => ({
+      ...f,
+      analisi: modo,
+      classi: new Set(tutteLeClassi(modo === 'scenario' ? SCALE.velocita : SCALE[modo])),
+    }))
     setSelezionati(new Set())
     setSelezionatiBus(new Set())
     mappa.current?.pulisciEvidenza()
