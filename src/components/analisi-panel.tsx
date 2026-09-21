@@ -6,7 +6,6 @@ import { Separator } from '@/components/ui/separator'
 import { classe, type Scala } from '@/lib/analisi'
 import { cn } from '@/lib/utils'
 import {
-  formattaKm,
   formattaLunghezza,
   formattaNumero,
   formattaPercento,
@@ -139,8 +138,9 @@ export function AnalisiPanel({
 
 /**
  * Con più segmenti scelti la domanda cambia: non «quanto vale questo» ma
- * «quanto pesano insieme». La media è pesata sulla lunghezza, perché un tratto
- * di 50 m e uno di 900 non contano uguale.
+ * «quanto valgono insieme». La media resta pesata sulla lunghezza — un tratto
+ * di 50 m e uno di 900 non contano uguale — anche se i km non si mostrano:
+ * nel pannello delle analisi l'unità visibile è il segmento.
  */
 function SelezioneMultipla({
   scala,
@@ -165,7 +165,7 @@ function SelezioneMultipla({
             Selezione
           </div>
           <h2 className="mt-0.5 text-sm leading-snug font-semibold">
-            {formattaNumero(segmenti.length)} segmenti &middot; {formattaKm(metri)}
+            {formattaNumero(segmenti.length)} segmenti
           </h2>
         </div>
         <Button
@@ -191,7 +191,7 @@ function SelezioneMultipla({
         <span className="text-sm text-muted-foreground">
           {scala.campo === 'vel' ? 'km/h' : 'su 100'}
         </span>
-        <span className="ml-auto text-[11px] text-muted-foreground">media sui km</span>
+        <span className="ml-auto text-[11px] text-muted-foreground">media</span>
       </div>
 
       <Separator className="my-3" />
