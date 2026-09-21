@@ -16,7 +16,6 @@ import { SegmentDetail } from '@/components/segment-detail'
 import { SegmentTable } from '@/components/segment-table'
 import { Legend } from '@/components/legend'
 
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -229,12 +228,6 @@ export default function App() {
               <h1 className="truncate text-sm font-semibold">
                 Nuove corsie preferenziali a Roma
               </h1>
-              <Badge
-                variant="outline"
-                className="shrink-0 border-transparent bg-[var(--brand-giallo)] text-[10px] font-medium text-[var(--brand-inchiostro)]"
-              >
-                bozza
-              </Badge>
             </div>
             <p className="truncate text-[11px] text-white/85">
               Proposta di rete su tre scenari di priorità
