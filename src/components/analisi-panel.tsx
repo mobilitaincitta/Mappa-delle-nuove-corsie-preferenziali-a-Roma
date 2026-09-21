@@ -28,8 +28,10 @@ interface Props {
  * Il pannello dell'analisi attiva: com'è distribuita la rete osservata fra le
  * quattro classi, e cosa dice il segmento selezionato.
  *
- * Le classi portano i km oltre al numero di segmenti: 400 spezzoni corti e 400
- * lunghi sono la stessa riga in un conteggio, e due realtà diverse in strada.
+ * Le classi si contano in segmenti, non in km: il pannello parla di segmenti
+ * dalla cifra in cima all'ultima riga, e una percentuale calcolata sui metri
+ * accanto a un conteggio si leggerebbe comunque come quota dei segmenti. Una
+ * sola unità, quella che si vede.
  */
 export function AnalisiPanel({
   scala,
@@ -44,17 +46,12 @@ export function AnalisiPanel({
     etichetta,
     tinta: scala.tinte[i],
     n: 0,
-    metri: 0,
     _i: i,
   }))
   for (const f of features) {
-    const riga = classi[classe(scala, f.properties[scala.campo])]
-    riga.n += 1
-    riga.metri += f.properties.len
+    classi[classe(scala, f.properties[scala.campo])].n += 1
   }
-  const metriTotali = classi.reduce((a, c) => a + c.metri, 0)
   const accese = classi.filter((c) => classiAttive.has(c._i))
-  const metriAccesi = accese.reduce((a, c) => a + c.metri, 0)
   const nAccesi = accese.reduce((a, c) => a + c.n, 0)
   const filtroAttivo = classiAttive.size !== classi.length
 
@@ -71,9 +68,6 @@ export function AnalisiPanel({
           <span className="text-sm text-muted-foreground">
             segmenti{filtroAttivo && ` su ${formattaNumero(features.length)}`}
           </span>
-        </div>
-        <div className="mt-1.5 text-xs text-muted-foreground">
-          {formattaKm(metriAccesi)} di rete bus &middot; misurati fra due fermate
         </div>
       </Card>
 
@@ -93,8 +87,8 @@ export function AnalisiPanel({
               key={c.etichetta}
               type="button"
               onClick={() => onToggleClasse(c._i)}
-              style={{ flexGrow: c.metri, backgroundColor: c.tinta }}
-              title={`${c.etichetta} — ${formattaKm(c.metri)}`}
+              style={{ flexGrow: c.n, backgroundColor: c.tinta }}
+              title={`${c.etichetta} — ${formattaNumero(c.n)} segmenti`}
               aria-label={`Mostra o nascondi la classe ${c.etichetta}`}
               className={cn(
                 'h-full min-w-1 cursor-pointer rounded-full transition-opacity first:rounded-l-full last:rounded-r-full',
@@ -121,11 +115,8 @@ export function AnalisiPanel({
                 style={{ backgroundColor: c.tinta }}
               />
               <span className="min-w-0 flex-1 truncate text-[13px]">{c.etichetta}</span>
-              <span className="tabular shrink-0 text-[13px] font-medium">
-                {formattaKm(c.metri)}
-              </span>
-              <span className="tabular w-9 shrink-0 text-right text-[11px] text-muted-foreground">
-                {formattaPercento(c.metri, metriTotali)}
+              <span className="tabular w-9 shrink-0 text-right text-[13px] font-medium">
+                {formattaPercento(c.n, features.length)}
               </span>
             </button>
           ))}
