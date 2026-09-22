@@ -81,6 +81,19 @@ distinguersi fra loro e dal piano, non ripeterne il colore.
 Caridad Pineda, poi in ordine alfabetico di cognome: Matteo Collotti, Giulia
 Galbiati, Nicola Ippolito, Giorgio Rubino, Gaia Sgaramella.
 
+## Cosa spiegano gli infobox
+
+Nel pannello di velocita' e benefit, sotto la cifra in cima, un riquadro dice
+cos'e' la grandezza mostrata e rimanda al
+[report finale](https://italy.cleancitiescampaign.org/wp-content/uploads/2026/09/Corsie-Preferenziali-Roma_Report_Finale_19_08.pdf)
+della campagna. La velocita' e' la velocita' commerciale misurata tramite GTFS
+real-time nella fascia 10:00 – 11:00 (report, pp. 69–70). Il benefit score e' un
+indice composto di priorita' relativa, 0–100, che combina risparmio di tempo per
+chilometro, numero di linee sul corridoio e solidita' delle osservazioni,
+normalizzato sul 95° percentile (report, pp. 72–73): 100 e' il gruppo di massima
+priorita' relativa, non un beneficio assoluto. I testi stanno in
+`src/lib/analisi.ts`, accanto alle soglie della scala che descrivono.
+
 ## Le tre analisi
 
 In cima al pannello di sinistra si sceglie **una** delle tre, e tutto il

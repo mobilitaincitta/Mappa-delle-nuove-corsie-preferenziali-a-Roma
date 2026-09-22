@@ -1,4 +1,4 @@
-import { X } from 'lucide-react'
+import { ExternalLink, Info, X } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -69,6 +69,28 @@ export function AnalisiPanel({
           </span>
         </div>
       </Card>
+
+      {/* Cos'è la grandezza: piccolo, sempre visibile, con il rimando al
+          report per chi vuole la costruzione completa. */}
+      <div className="flex gap-2.5 rounded-lg border bg-muted/40 px-3 py-2.5 text-[12px] leading-relaxed text-muted-foreground">
+        <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+        <div className="grid gap-1.5">
+          {scala.spiegazione.map((testo) => (
+            <p key={testo}>{testo}</p>
+          ))}
+          {scala.fonte && (
+            <a
+              href={scala.fonte.url}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1 font-medium text-foreground hover:underline"
+            >
+              {scala.fonte.testo}
+              <ExternalLink className="size-3" aria-hidden />
+            </a>
+          )}
+        </div>
+      </div>
 
       <Card className="gap-3 px-4 py-3.5">
         <div className="flex items-baseline justify-between">

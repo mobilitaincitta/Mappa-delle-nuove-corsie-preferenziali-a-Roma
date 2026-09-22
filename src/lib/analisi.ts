@@ -18,7 +18,16 @@ export interface Scala {
   etichette: string[]
   /** Variabili CSS, una per classe. */
   tinte: string[]
+  /**
+   * Cos'è la grandezza, detto a chi non ha letto il report. Paragrafi brevi:
+   * il pannello è stretto e l'infobox deve restare piccolo.
+   */
+  spiegazione: string[]
+  fonte?: { testo: string; url: string }
 }
+
+const REPORT =
+  'https://italy.cleancitiescampaign.org/wp-content/uploads/2026/09/Corsie-Preferenziali-Roma_Report_Finale_19_08.pdf'
 
 export const SCALE: Record<Exclude<ModoAnalisi, 'scenario'>, Scala> = {
   velocita: {
@@ -28,6 +37,13 @@ export const SCALE: Record<Exclude<ModoAnalisi, 'scenario'>, Scala> = {
     soglie: [10, 20, 30],
     etichette: ['0 – 10', '10 – 20', '20 – 30', 'oltre 30'],
     tinte: [1, 2, 3, 4].map((i) => `var(--an-vel-${i})`),
+    spiegazione: [
+      'Velocità commerciale misurata tramite GTFS real-time: la velocità media ' +
+        'effettiva del bus fra due fermate, soste e code comprese, ricavata dalle ' +
+        'posizioni trasmesse dai veicoli.',
+      'Rilevata nella fascia di punta 10:00 – 11:00.',
+    ],
+    fonte: { testo: 'Report finale, pp. 69–70', url: REPORT },
   },
   benefit: {
     titolo: 'Benefit score',
@@ -36,6 +52,16 @@ export const SCALE: Record<Exclude<ModoAnalisi, 'scenario'>, Scala> = {
     soglie: [25, 50, 75],
     etichette: ['0 – 25', '25 – 50', '50 – 75', '75 – 100'],
     tinte: [1, 2, 3, 4].map((i) => `var(--an-ben-${i})`),
+    spiegazione: [
+      'Indice composto di priorità relativa, da 0 a 100, che ordina i segmenti ' +
+        'per la convenienza di un intervento di priorità al trasporto pubblico.',
+      'Combina tre dimensioni: il risparmio di tempo stimato per chilometro, il ' +
+        'numero di linee che condividono il corridoio e la solidità delle ' +
+        'osservazioni disponibili.',
+      'È normalizzato sul 95° percentile: 100 indica il gruppo di massima priorità ' +
+        'relativa, non un beneficio assoluto.',
+    ],
+    fonte: { testo: 'Report finale, pp. 72–73', url: REPORT },
   },
 }
 
