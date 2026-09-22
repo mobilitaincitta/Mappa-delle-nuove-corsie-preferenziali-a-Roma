@@ -58,8 +58,6 @@ export const SCALE: Record<Exclude<ModoAnalisi, 'scenario'>, Scala> = {
       'Combina tre dimensioni: il risparmio di tempo stimato per chilometro, il ' +
         'numero di linee che condividono il corridoio e la solidità delle ' +
         'osservazioni disponibili.',
-      'È normalizzato sul 95° percentile: 100 indica il gruppo di massima priorità ' +
-        'relativa, non un beneficio assoluto.',
     ],
     fonte: { testo: 'Report finale, pp. 72–73', url: REPORT },
   },
