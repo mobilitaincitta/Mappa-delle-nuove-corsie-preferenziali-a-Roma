@@ -38,11 +38,14 @@ export function formattaPercento(parte: number, totale: number): string {
   return `${nf(0, 0).format(Math.round((parte / totale) * 100))}%`
 }
 
-export const etichettaScenario = (s: number) => `Scenario ${s}`
+export const etichettaScenario = (s: number) => `Priorità ${s}`
 
-/** Il numero di scenario è una priorità di attuazione: va detto a parole. */
+/**
+ * Il numero è un ordine di attuazione: accanto a «Priorità 1» ripetere «prima
+ * priorità» non aggiunge niente, dire quanto pesa sì.
+ */
 export const descrizioneScenario: Record<number, string> = {
-  1: 'Prima priorità',
-  2: 'Seconda priorità',
-  3: 'Terza priorità',
+  1: 'più alta',
+  2: 'intermedia',
+  3: 'più bassa',
 }

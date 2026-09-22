@@ -230,7 +230,7 @@ export default function App() {
               </h1>
             </div>
             <p className="truncate text-[11px] text-white/85">
-              Proposta di rete su tre scenari di priorità
+              Proposta di rete su tre livelli di priorità
             </p>
           </div>
           {dataset && (

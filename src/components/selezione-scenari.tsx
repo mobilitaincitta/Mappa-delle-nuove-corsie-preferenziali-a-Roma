@@ -64,7 +64,7 @@ export function SelezioneScenari({
                 aria-hidden
               />
               <span className="tabular">{formattaKm(s.metri)}</span>
-              <span className="text-muted-foreground">sc. {s.scenario}</span>
+              <span className="text-muted-foreground">pr. {s.scenario}</span>
             </span>
           ))}
       </div>

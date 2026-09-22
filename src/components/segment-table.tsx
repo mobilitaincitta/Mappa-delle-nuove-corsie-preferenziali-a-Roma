@@ -84,7 +84,7 @@ export function SegmentTable({ segmenti, selezionati, onSeleziona }: Props) {
               onClick={() => ordina('scenario')}
               className="w-20"
             >
-              Sc.
+              Pr.
             </Intestazione>
             <Intestazione
               attiva={colonna === 'len'}

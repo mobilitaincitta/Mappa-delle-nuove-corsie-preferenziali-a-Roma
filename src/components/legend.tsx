@@ -85,9 +85,9 @@ export function Legend({
             Corsie preferenziali proposte
           </div>
           <div className="mt-2 grid gap-1.5">
-            <Voce classe="bg-sc1" testo="Scenario 1" nota="prima priorità" />
-            <Voce classe="bg-sc2" testo="Scenario 2" nota="seconda priorità" />
-            <Voce classe="bg-sc3" testo="Scenario 3" nota="terza priorità" />
+            <Voce classe="bg-sc1" testo="Priorità 1" nota="più alta" />
+            <Voce classe="bg-sc2" testo="Priorità 2" nota="intermedia" />
+            <Voce classe="bg-sc3" testo="Priorità 3" nota="più bassa" />
           </div>
         </>
       ) : (

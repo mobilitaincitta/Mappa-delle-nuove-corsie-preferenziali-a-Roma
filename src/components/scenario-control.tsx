@@ -40,8 +40,8 @@ export function ScenarioControl({ perScenario, totale, attivi, onToggle }: Props
               type="button"
               onClick={() => onToggle(scenario as Scenario)}
               style={{ flexGrow: g.len }}
-              title={`Scenario ${scenario} — ${formattaKm(g.len)}`}
-              aria-label={`Mostra o nascondi lo scenario ${scenario}`}
+              title={`Priorità ${scenario} — ${formattaKm(g.len)}`}
+              aria-label={`Mostra o nascondi la priorità ${scenario}`}
               className={cn(
                 'h-full min-w-1 cursor-pointer rounded-full transition-opacity first:rounded-l-full last:rounded-r-full',
                 CLASSE_SFONDO[scenario],
@@ -74,7 +74,7 @@ export function ScenarioControl({ perScenario, totale, attivi, onToggle }: Props
                 )}
               />
               <span className="min-w-0 flex-1 truncate text-[13px]">
-                Scenario {scenario}
+                Priorità {scenario}
                 <span className="ml-1.5 text-[11px] text-muted-foreground">
                   {descrizioneScenario[scenario]}
                 </span>

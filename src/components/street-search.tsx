@@ -251,7 +251,7 @@ export function StreetSearch({
 function PallinoScenario({ scenario }: { scenario: number }) {
   return (
     <span
-      title={`Scenario ${scenario}`}
+      title={`Priorità ${scenario}`}
       className={cn(
         'size-2.5 rounded-full ring-1 ring-black/10 dark:ring-white/15',
         scenario === 1 && 'bg-sc1',

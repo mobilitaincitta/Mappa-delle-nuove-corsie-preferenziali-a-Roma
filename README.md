@@ -1,7 +1,7 @@
 # Nuove corsie preferenziali a Roma — dashboard della proposta di rete
 
 Dashboard della rete di corsie preferenziali proposte per Roma: 159 km di nuove
-corsie su tre scenari di priorità (87 + 53 + 19 km), messi a confronto con i
+corsie su tre livelli di priorità (87 + 53 + 19 km), messi a confronto con i
 114,4 km esistenti.
 
 I km di sintesi sono quelli dichiarati dal piano, impostati in `KM_DICHIARATI`
@@ -88,7 +88,7 @@ pannello racconta quella:
 
 | Analisi | Soggetto | Pannello |
 |---|---|---|
-| Scenario | i 275 tratti del piano | km per priorita', tabella dei segmenti, dettaglio del tratto |
+| Priorità | i 275 tratti del piano | km per priorita', tabella dei segmenti, dettaglio del tratto |
 | Velocita | i 3992 segmenti bus osservati | km per classe, dettaglio del segmento |
 | Benefit | gli stessi segmenti | km per classe, dettaglio del segmento |
 
@@ -116,7 +116,7 @@ della selezione. La classificazione a quattro classi non cambia. Sono 500
 segmenti e 201 km, un ottavo della rete.
 
 Le selezioni sopravvivono ai filtri ma contano e si evidenziano solo se visibili:
-un tratto scelto e poi nascosto da una classe o da uno scenario spento non ha
+un tratto scelto e poi nascosto da una classe o da una priorita' spenta non ha
 alone ne' scheda, e ricompare riaccendendo il filtro. In analisi la ricerca di
 una strada seleziona i segmenti bus con quel nome, non le corsie nascoste.
 
@@ -126,7 +126,7 @@ la legenda in mappa parte chiusa, altrimenti coprirebbe quasi tutta la mappa di
 un telefono.
 
 In tutte e tre le analisi le categorie si accendono e si spengono dalla stessa
-barra divisa: gli scenari in «scenario», le quattro classi in velocita' e
+barra divisa: le tre priorita' in «priorità», le quattro classi in velocita' e
 benefit. Le righe sotto la barra fanno da legenda e da filtro insieme, e il
 riquadro in cima passa a «selezione corrente» con i km di cio' che resta acceso.
 

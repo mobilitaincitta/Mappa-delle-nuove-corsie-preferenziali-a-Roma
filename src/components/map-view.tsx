@@ -396,7 +396,7 @@ export function MapView({
           `<div class="px-3 py-2 text-xs">
              <div class="font-medium text-[13px] leading-tight">${escapeHtml(p.nome)}</div>
              <div class="mt-1 text-muted-foreground">
-               Scenario ${p.scenario} · ${formattaLunghezza(Number(p.len))}
+               Priorità ${p.scenario} · ${formattaLunghezza(Number(p.len))}
              </div>
 
            </div>`

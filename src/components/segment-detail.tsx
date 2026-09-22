@@ -48,7 +48,7 @@ export function SegmentDetail({ segmento, omonimi, onChiudi, onInquadra, onVaiA 
             className={cn('size-2 rounded-full', CLASSE_SFONDO[p.scenario])}
             aria-hidden
           />
-          Scenario {p.scenario}
+          Priorità {p.scenario}
         </Badge>
         <Badge variant="outline" className="font-normal">
           {formattaLunghezza(p.len)}
@@ -100,7 +100,7 @@ export function SegmentDetail({ segmento, omonimi, onChiudi, onInquadra, onVaiA 
                   )}
                   aria-hidden
                 />
-                <span className="text-muted-foreground">Scenario {f.properties.scenario}</span>
+                <span className="text-muted-foreground">Priorità {f.properties.scenario}</span>
                 <span className="tabular ml-auto">{formattaLunghezza(f.properties.len)}</span>
               </button>
             ))}

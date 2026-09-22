@@ -18,7 +18,7 @@ interface Props {
  * interruttori, e sta in cima: decide tutto ciò che viene dopo.
  */
 const VOCI: [ModoAnalisi, string][] = [
-  ['scenario', 'Scenario'],
+  ['scenario', 'Priorità'],
   ['velocita', 'Velocità'],
   ['benefit', 'Benefit'],
 ]
