@@ -465,8 +465,40 @@ export function MapView({
       }
     })
 
+    /**
+     * Se lo stile non arriva a `load`, l'area resterebbe vuota per sempre senza
+     * dire niente: la causa tipica è la rete che blocca il servizio delle tile.
+     *
+     * Ma un `load` in ritardo non è un guasto. In una scheda in secondo piano
+     * il browser non produce frame e l'evento arriva solo quando si torna a
+     * guardarla; su una rete lenta arriva dopo i quindici secondi. In entrambi
+     * i casi la mappa poi funziona, e l'avviso deve sparire quando arriva —
+     * prima restava sopra una mappa perfettamente disegnata. Con la scheda
+     * nascosta il timer si riarma invece di dichiarare il guasto.
+     */
+    const ATTESA_MS = 15000
+    let guardiano: ReturnType<typeof setTimeout>
+    const arma = () => {
+      guardiano = setTimeout(() => {
+        if (pronta.current) return
+        if (document.hidden) {
+          arma()
+          return
+        }
+        setGuasto(
+          'La mappa non ha completato il caricamento. Le cause più comuni sono ' +
+            'le tile di sfondo bloccate dalla rete (services.arcgisonline.com) ' +
+            'oppure la scheda rimasta in secondo piano durante l’apertura. ' +
+            'I dettagli sono in console, con prefisso [mappa].'
+        )
+      }, ATTESA_MS)
+    }
+    arma()
+
     map.on('load', () => {
       pronta.current = true
+      clearTimeout(guardiano)
+      setGuasto(null)
       etichetteMetro.current = creaEtichette(map, dataset)
       aggiornaEtichette(map, etichetteMetro.current, filtri.mostraMetro)
       aggiornaFiltri(map, filtri)
@@ -479,18 +511,6 @@ export function MapView({
       map.fitBounds(bounds, { padding: 32, duration: 0 })
     })
 
-    // Se lo stile non arriva a `load`, l'area resterebbe vuota per sempre senza
-    // dire niente: la causa tipica è la rete che blocca il servizio delle tile.
-    const guardiano = setTimeout(() => {
-      if (!pronta.current) {
-        setGuasto(
-          'La mappa non ha completato il caricamento. Le cause più comuni sono ' +
-            'le tile di sfondo bloccate dalla rete (services.arcgisonline.com) ' +
-            'oppure la scheda rimasta in secondo piano durante l\'apertura. ' +
-            'I dettagli sono in console, con prefisso [mappa].'
-        )
-      }
-    }, 15000)
 
     /**
      * MapLibre reagisce al ridimensionamento della finestra, non a quello del
